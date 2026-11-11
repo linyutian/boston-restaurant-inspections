@@ -17,7 +17,8 @@ problems per visit, and the public is exposed to hazards for fewer days.
   (holding temperatures, cross-contamination, handwashing, sanitizing). We use only information
   known **before the month starts**:
   - the establishment's own inspection record and its recent trend,
-  - how strict recent inspections have been in its area.
+  - how strict recent inspections have been in its area,
+  - the notes inspectors wrote at its last two inspections (Phase 2).
 
   Other signals (its owner's other establishments, nearby 311 complaints, violation types, season)
   were tested and added nothing.
@@ -85,16 +86,27 @@ found about half of them, the simple rule 70%, and the model 75%.
 - **What the model misses is mostly surprises:** places with clean records whose kitchens slipped.
 
 ### Phase 2 · inspector comments
-_Coming soon._ What we expect, and what to watch for:
-- **Why it could help:** comments describe what counts can't, such as how severe a problem was,
-  whether it keeps recurring, and how the kitchen is managed. Among places with a clean last
-  inspection, those with more inspector notes are far riskier (8% vs 30%), and mentions of mice or
-  "repeat" violations signal higher risk.
-- **Why it may not help much:** much of that signal overlaps with violation counts the model
-  already uses. The comments are also short, and inspectors write in different styles.
-- **Expectation:** a small gain at most. The experiments run cheapest-first and stop early if the
-  simple keyword model finds nothing beyond the counts. Even then, comment snippets can make the
-  priority list easier to explain to inspectors.
+Same clean 2024 check as Phase 1. The final test on 2025–26 is still to come.
+
+| Order of visits within the month | Share of first-half visits that find a Priority violation | Share of the month's violations found in the first 10% of visits |
+|---|---|---|
+| Simple rule (as above) | 32.4% | 19.0% |
+| Phase 1 model | 34.8% | 21.5% |
+| **Phase 1 model + inspector comments** | **34.8%** | **22.6%** |
+
+- **The comments add a little, at the very top of the list.** About one extra serious violation
+  is found each month in the first few days, and overall ranking quality improves in every year
+  tested. By mid-month both orders have found the same violations, so the headline does not move.
+- **What the comments add is what kind of kitchen a place is** (raw meat, heavy prep), not how many
+  violations it had. Counting violation types or how much the inspector wrote does not reproduce it.
+- **Most of what the comments say, the inspection record already shows.** Places with more notes,
+  or notes about mice, cockroaches or "repeat" violations, are much riskier (after a last inspection
+  with no serious violation: 10% with no notes vs 32% with six or more). But the Phase 1 model already
+  expects most of that risk.
+- **The simplest text model worked best.** Word counts beat sentence embeddings and a fine-tuned
+  transformer (DistilBERT). As in Phase 1, the limit is the information, not the algorithm.
+- **For explaining the list to inspectors,** showing a place's last inspection notes is clearer
+  than snippets picked by the model, which are often generic.
 
 ## Implications and next steps
 _Coming after the final evaluation._

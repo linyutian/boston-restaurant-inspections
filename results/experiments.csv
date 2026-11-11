@@ -78,3 +78,25 @@ date,notebook,experiment,HR@50,vs current (per 100),vs B1 (per 100),vs B1 95% CI
 2026-11-11,03b_tuning_round,Rule 1 · previous inspection · 2022–24 pooled · two-week,0.3099665088347384,,,,,1.9842770888374346,,,two-week replay (§8); HR@50 = first half of each block or month,,0.0,—
 2026-11-11,03b_tuning_round,Model (b) · simplified logistic regression · 2022–24 pooled · two-week,0.3349116526157755,,,,,2.780953239256488,,,two-week replay (§8); HR@50 = first half of each block or month,,2.494514378103707,"[+1.9, +3.0]"
 2026-11-11,03b_tuning_round,Oracle · 2022–24 pooled · two-week,0.4322670054278785,,,,,5.543837001909738,,,two-week replay (§8); HR@50 = first half of each block or month,,12.230049659314007,"[+11.3, +13.2]"
+2026-11-11,04_text_models,"model (b), no text",0.3291225674291567,,,,,,0.47611603898448773,,selection score on folds 1–2 (2022–23); step baseline,,,
+2026-11-11,04_text_models,1 cycle · C=0.1,0.3299761010583817,,,,,,0.4822713552097014,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4276,,
+2026-11-11,04_text_models,1 cycle · C=0.3,0.33134175486514167,,,,,,0.48271188659406444,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4280,,
+2026-11-11,04_text_models,1 cycle · C=1,0.3315124615909867,,,,,,0.4824016122550972,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4193,,
+2026-11-11,04_text_models,2 cycles · C=0.1,0.3310003414134517,,,,,,0.48422824852581636,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4447,,
+2026-11-11,04_text_models,2 cycles · C=0.3,0.3306589279617617,,,,,,0.48441800155330583,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4450,,
+2026-11-11,04_text_models,2 cycles · C=1,0.3303175145100717,,,,,,0.48353097910709486,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4371,,
+2026-11-11,04_text_models,3 cycles · C=0.1,0.33134175486514167,,,,,,0.48102343819076715,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4321,,
+2026-11-11,04_text_models,3 cycles · C=0.3,0.3299761010583817,,,,,,0.480143782820728,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4322,,
+2026-11-11,04_text_models,3 cycles · C=1,0.3308296346876067,,,,,,0.47782992334688235,,selection score on folds 1–2 (2022–23); step E1,text alone PR-AUC 0.4267,,
+2026-11-11,04_text_models,model (b) + violation-type counts (8),0.3294639808808467,,,,,,0.47737891136574717,,selection score on folds 1–2 (2022–23); step E1 controls,,,
+2026-11-11,04_text_models,model (b) + verbosity (2),0.3287811539774667,,,,,,0.4779299276303291,,selection score on folds 1–2 (2022–23); step E1 controls,,,
+2026-11-11,04_text_models,"model (b) + text (2 cycles · C=0.3), for comparison",0.3306589279617617,,,,,,0.48441800155330583,,selection score on folds 1–2 (2022–23); step E1 controls,,,
+2026-11-11,04_text_models,mean · C=0.003,0.3275862068965517,,,,,,0.4779355289351004,,selection score on folds 1–2 (2022–23); step E2,text alone PR-AUC 0.3318,,
+2026-11-11,04_text_models,mean · C=0.03,0.3280983270740867,,,,,,0.4777190029085032,,selection score on folds 1–2 (2022–23); step E2,text alone PR-AUC 0.3274,,
+2026-11-11,04_text_models,sum + log count · C=0.003,0.3286104472516217,,,,,,0.4800033849951763,,selection score on folds 1–2 (2022–23); step E2,text alone PR-AUC 0.4371,,
+2026-11-11,04_text_models,sum + log count · C=0.03,0.3291225674291567,,,,,,0.4790187143804441,,selection score on folds 1–2 (2022–23); step E2,text alone PR-AUC 0.4258,,
+2026-11-11,04_text_models,"E1 + E2 (sum + log count · C=0.003), both scores",0.3296346876066917,,,,,,0.48368575058825186,,selection score on folds 1–2 (2022–23); step E2,,,
+2026-11-11,04_text_models,DistilBERT (fine-tuned),0.3292932741550017,,,,,,0.4803275386615905,,selection score on folds 1–2 (2022–23); step E3,text alone PR-AUC 0.4132,,
+2026-11-11,04_text_models,"E1 + E3, both scores",0.3304882212359167,,,,,,0.48474346896121534,,selection score on folds 1–2 (2022–23); step E3,,,
+2026-11-11,04_text_models,Model (b),0.3480427046263345,,,,,4.8745291999631615,0.4231400188269792,,final check on 2024 (clean),,2.4199288256227747,"[+1.5, +3.5]"
+2026-11-11,04_text_models,"Model (b) + text (E1 · TF-IDF, 2 cycles · C=0.3)",0.34839857651245554,,,,,4.932022221868004,0.4316675924699972,,final check on 2024 (clean),"{'text': ['E1'], 'n_cycles': 2, 'tfidf_C': 0.3, 'e2': ('sum + log count', 0.003), 'e3': {'model': 'distilbert/distilbert-base-uncased', 'n_cycles': 2, 'max_len': 256, 'epochs': 2, 'lr': 3e-05, 'batch_size': 32, 'inner': 5}}",2.4555160142348766,"[+1.6, +3.6]"

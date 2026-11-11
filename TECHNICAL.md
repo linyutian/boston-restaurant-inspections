@@ -361,7 +361,80 @@ judged there. → nb 03b
 - **Robustness:** the gain holds on two-week blocks (+2.5, §4). → nb 03b §8
 
 ### Phase 2: inspector-comment text
-*To be added.*
+*Notebook 04 results, reviewed 2026-11-11. The one-time test (nb 05) follows.* → nb 04
+
+**The text a row may see.** The free-text `comments` on violation rows (95–100% coverage in every
+year) from the establishment's **last two routine cycles before t0**: its last two routine visits
+and their follow-ups.
+- Comments are de-duplicated within the row, because pass visits repeat 98% of earlier comments.
+- They are ordered newest first.
+- Email addresses, phone numbers and role- or title-named persons are masked first. Food Code tags
+  sit in `violdesc` only, so the comments carry no category labels.
+
+Leakage checks (assert):
+- All text predates t0.
+- A truncation test gives identical text when later data is deleted.
+
+77% of rows have some text. Two cycles were chosen over one or three on folds 1–2.
+
+**How text enters: stacking.** A text model predicts a hit from text alone. Its logit becomes a 34th
+input to model (b), with the same classifier. Training rows get out-of-fold scores (5 groups by
+establishment), so model (b) never sees a text score fitted on the same row. This keeps model (b)'s
+tuned regularisation intact, and every text model enters the same way.
+
+| Step (folds 1–2) | Text alone, PR-AUC | Model (b) + text, PR-AUC | Outcome |
+|---|---|---|---|
+| Model (b), no text | — | 0.476 | baseline |
+| E1 · TF-IDF words + word pairs, logistic regression | 0.445 | **0.484** | kept |
+| E2 · frozen MiniLM sentence embeddings (sum-pooled) | 0.437 | 0.480; with E1: 0.484 | adds nothing |
+| E3 · fine-tuned DistilBERT (256 tokens, 2 epochs, untuned) | 0.413 | 0.480; with E1: 0.485 | adds nothing → stop |
+| *Controls:* model (b) + violation-type counts / + verbosity | — | 0.477 / 0.478 | within noise |
+
+| 2024 (clean) | First-half hit rate | vs model (b), per 100 | vs Rule 1, per 100 | PR-AUC | Hits found in the first 10% of visits |
+|---|---|---|---|---|---|
+| Model (b) | 34.8% | — | +2.4 [+1.5, +3.5] | 0.423 | 21.5% |
+| Model (b) + TF-IDF text | 34.8% | +0.0 [−0.3, +0.4] | +2.5 [+1.6, +3.6] | 0.432 | 22.6% |
+
+- **The comments hold information the structured record lacks,** mostly *what kind of kitchen* it is.
+  Words that raise the score: raw proteins, prep, "discontinue", "corrected on site". Words that
+  lower it: coffee, sandwiches, maintenance items. PR-AUC rises in every year (+0.007 / +0.010 /
+  +0.009), and the gain is not explained by violation types or by verbosity.
+- **The headline does not move.** The gain sits at the very top of each month's list: the 71
+  visits the text moved into the 2024 monthly top 10% hit 54% of the time, the 71 it pushed out
+  32%. By the halfway point the two orders have found the same hits.
+- **The simplest text model is best.** Embeddings and a fine-tuned transformer found the same
+  signal less sharply (their scores correlate 0.90 and 0.92 with TF-IDF's). Like Phase 1, the limit
+  is the information, not the algorithm.
+- **The pre-check holds only as a raw association.** Rodent, cockroach and "repeat" mentions carry
+  raw lifts of +18 to +28 points, but model (b) already expects most of it (observed − expected:
+  +1.6 to +4 points).
+- **Kitchen or inspector?** The text score correlates 0.26 with local strictness. Its gain is not
+  concentrated in the strictest areas, and it is stable across 2022–24. A few phrases read like
+  particular inspectors' habits, so a style component can't be excluded without inspector IDs (§8).
+- **As explanations,** model-picked snippets are only partly meaningful: some are specific hazards,
+  others generic cleaning notes. Showing the last inspection's comments directly is the safer
+  option.
+
+**Compute (E3).** One epoch on 2,000 rows was timed on the M4 Pro (`mps`) first: about 1.3 h
+estimated for the whole DistilBERT backtest, 3.8 h for ModernBERT. Colab (T4) was not timed, since
+it needs an interactive session; at a typical 2–3× speed-up the saving (under an hour) did not
+justify moving the data off the machine. The actual run took 9.3 h of wall-clock time: the largest
+fold (2024, 21,828 training rows) took 39 minutes, in line with the estimate, and the smallest 377,
+so the excess was the machine sleeping or throttling during an unattended run, not the method. Keep
+the machine awake when re-running (`caffeinate -i`), or use a GPU session. Scores are cached in
+`data/processed/` (git-ignored) under a key naming every setting.
+
+**Decisions after review (2026-11-11).**
+- **Models for the one-time test:** model (b) + TF-IDF is primary, because the pre-declared keep
+  rule (PR-AUC) selected it. Model (b) is a pre-declared secondary, because by "simplest model
+  within noise" on the headline the two tie. Both are scored once on the test period; which to
+  deploy rests on the headline, where they are expected to tie.
+- **README:** the Phase 2 expectations were replaced by the 2024 results, including that most of
+  the comment signal overlaps with the structured record. The earlier rough pre-check figure
+  (8% vs 30%) is replaced by the measured one (10% vs 32%).
+- **Transformer work paused.** E4 not run; the stop rule was met and the expected gain is near zero.
+- **Implication:** comment text is worth keeping only for the top of the list and for explanation.
+  A deployment that needs to stay simple can use model (b) alone and lose little.
 
 ---
 
@@ -379,5 +452,8 @@ judged there. → nb 03b
   test.
 - **No counterfactuals beyond the month.** The evaluation cannot say what would happen if different
   establishments were inspected, only what happens when the same ones are re-ordered.
+- **Text may partly encode the inspector.** Some comment phrases look like individual inspectors'
+  recording habits. The text's added value is small and spread evenly across areas, but without
+  inspector IDs this cannot be separated from the kitchen's condition. → nb 04 §9
 - **History resets with new licenses.** Ownership changes create new license numbers, and
   `property_id` is too coarse to link them.

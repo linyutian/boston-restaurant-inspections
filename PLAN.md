@@ -19,11 +19,21 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
     (+2.5).
   - **Exit bar (+3) narrowly not met.** Neither complex models nor tuning moved it.
   - TECHNICAL.md §4 and §7; README results.
-- **Phase 2: GO** (decided 2026-11-11). **Not started**; it begins on your instruction. Pick-up
-  list below.
+- **Phase 2 in progress. Notebook 04 (text experiments) is done and reviewed (2026-11-11).**
+  - **Selected:** model (b) + a TF-IDF text score (2 cycles of earlier comments). PR-AUC improves in
+    every year (2024: 0.423 → 0.432).
+  - **The headline is unchanged:** 34.8% first-half hit rate on 2024, +0.0 [−0.3, +0.4] vs model
+    (b). Still +2.5 vs Rule 1, so the bar is not met. The gain is in the first 10% of the list
+    (about one extra hit a month).
+  - **Ladder:** E1 TF-IDF kept · E2 frozen embeddings and E3 fine-tuned DistilBERT add nothing →
+    stop rule met; E4 not run.
+  - **Decided:** D1 model (b) + TF-IDF primary, model (b) secondary for the test · D2 transformer
+    work paused · D3 README, TECHNICAL.md and this file updated.
+  - **D4 approved:** notebook 05 is agreed (estimate about 2–3 h of build, under 15 min of compute).
+    **Paused** until the author says go (the run needs uninterrupted internet).
 - **Documentation** is consistent with the latest run:
   - README: problem statement, approach, Phase 1 results on 2024 with the chart from model (b),
-    Phase 2 expectations;
+    Phase 2 results on 2024 (final test pending);
   - TECHNICAL.md: methodology, living document;
   - CONTRIBUTING.md: how to work;
   - this file.
@@ -40,8 +50,8 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 3. ✅ Two-week replay (nb 03b §8). Gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); "days
    earlier" halves by construction.
 4. ✅ **Phase 2 go / no-go: GO** (2026-11-11).
-5. **Phase 2:** notebook 04 (text experiments), then notebook 05 (one-time test, impact, fairness).
-   Waiting for your instruction to start.
+5. **Phase 2:** ✅ notebook 04 (text experiments), reviewed; D1–D3 decided. Next: notebook 05
+   (one-time test, impact, fairness): approved, paused until the author says go.
 6. **Phase 3:** consolidate code into `src/inspections/` with tests, pin dependencies, and complete
    the README.
 
@@ -64,8 +74,8 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | 02 | `02_metric_and_baselines` | How good are current practice and simple rules, and what is the ceiling? | ✅ done · reviewed |
 | 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · reviewed |
 | 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
-| 04 | `04_text_models` | Does inspector-comment text add value? | Phase 2 · **go**, not started |
-| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 · not started |
+| 04 | `04_text_models` | Does inspector-comment text add value? | ✅ done · reviewed; TF-IDF kept (ranking gain, headline unchanged); stop rule met; transformer paused |
+| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 · approved; paused until the author says go |
 
 ## Phases
 **Phase 1, tabular (done).** Exit criterion: beat Rule 1 by ≥ 3 hits per 100 visits with a CI
@@ -74,8 +84,8 @@ excluding zero.
 - After tuning, judged on the clean year 2024: +2.4 [+1.5, +3.5] (adopted model b).
 - Narrowly not met. Phase 2 goes ahead anyway (decision 2026-11-11).
 
-**Phase 2, inspector-comment text (nb 04–05): GO, not started.** Experiments run cheapest first;
-each is kept only if it beats the current best:
+**Phase 2, inspector-comment text (nb 04–05): nb 04 done and reviewed.** Experiments run
+cheapest first; each is kept only if it beats the current best:
 1. TF-IDF + logistic regression
 2. Frozen sentence embeddings as extra features
 3. Fine-tuned small transformer (DistilBERT / ModernBERT); its out-of-fold score feeds the
@@ -84,6 +94,8 @@ each is kept only if it beats the current best:
 
 Stop after two experiments in a row add nothing. Then calibrate, retrain on 2020–2024, and run the
 test period once (nb 05), including impact numbers and a fairness check by neighbourhood.
+- Outcome (nb 04): E1 kept (+0.008 PR-AUC on folds 1–2); E2 −0.001 and E3 +0.000 on top of E1 →
+  stopped; E4 not run. On 2024: +0.0 per 100 visits vs model (b), +2.5 [+1.6, +3.6] vs Rule 1.
 
 **Phase 2 pick-up list** (flags and queued items collected during Phase 1):
 
@@ -101,6 +113,16 @@ test period once (nb 05), including impact numbers and a fairness check by neigh
 | P10 | **Explanations** | README Phase 2 expectations | Even if accuracy gains are small, test comment snippets as "why this place is on the list" explanations |
 | P11 | **Fairness check by neighbourhood** | Local-strictness signal; limitations | nb 05: flag rates and hit rates by neighbourhood and income tract |
 | P12 | **Days-earlier depends on the planning period** | nb 03b §8 | Report per-visit lift and days earlier separately; note what a twice-monthly list would add |
+
+Status after nb 04:
+- **Done in nb 04:** P1–P10 and P12.
+  - P3: the raw claims hold, but they largely overlap with model (b) (§3).
+  - P6: Food Code tags are in `violdesc` only. Inspector emails and phone numbers were masked. No
+    sign of an inspector proxy, but it can't be ruled out (§9).
+  - P9: DistilBERT run locally. Colab not timed (needs an interactive session).
+  - P10: model-picked snippets are only partly meaningful. Show the last inspection's comments
+    instead (§10).
+- **Still to do:** P11 (fairness) in nb 05. P12 for nb 05 as well.
 
 **Phase 3, consolidate and publish.** Move stable code into `src/inspections/` with tests, pin
 dependencies, complete the README (final results, implications and next steps).
@@ -147,7 +169,8 @@ Scope run so far: **Tier A only** (agreed 2026-11-11). Outcomes are in the last 
    gains don't depend on month-long stability; only a live pilot removes the assumption entirely.
 3. **Part of the signal is the inspector, not the kitchen** (local strictness), which raises a
    fairness and communication question.
-4. **The text phase may add little;** the cheapest-first ladder and stop rule limit the cost.
+4. **The text phase added little** (nb 04): a consistent ranking gain at the very top of the list,
+   no change to the first-half hit rate.
 
 ## Risk register and checks
 Each risk has a check that runs in the named notebook. "Assert" means the notebook stops if it
@@ -172,14 +195,14 @@ fails.
 | R13 | Violation code system changes around 2018, breaking violation-group features | ✅ Keyword map on `violdesc` covers 96% (2020+) and 99.7% (earlier) of rows | nb 03, assert coverage |
 | R14 | Group-level encodings (neighborhood, owner fail rate) computed on all years leak the future | ✅ Everything is computed as of decision time; truncation test (features identical when all later data is deleted: 0 mismatches) | nb 03, assert |
 | **Text** | | | |
-| R15 | Follow-up rows repeat earlier comments; text of the *current* visit leaks the answer | De-duplicate text per inspection; assert every text source date < *t* | nb 04, assert |
-| R16 | Text over 512 tokens is silently truncated | Token length distribution; choose N past visits / truncation side on purpose | nb 04 |
-| R17 | The model learns inspector writing style, or the 2018 wording shift, instead of risk | Performance by year and by era; strip Food Code tags such as `(P)` | nb 04 |
-| R18 | **Personal data in a public repo**: owner and contact names; names inside free-text comments | ✅ Names dropped / hashed at load (asserted). Still to do in Phase 2: scan any comment shown in outputs or the README for names | nb 01 onward, assert columns absent |
+| R15 | Follow-up rows repeat earlier comments; text of the *current* visit leaks the answer | ✅ Text only from visits before *t0*, de-duplicated within each row (pass visits repeat 98% of comments); truncation test 0 mismatches; < 0.1% of comments mention a later date (deadlines) | nb 04, assert |
+| R16 | Text over 512 tokens is silently truncated | ✅ 2-cycle text: median 125 tokens, 5% over 512. TF-IDF and embeddings see all of it; DistilBERT reads 256 tokens, newest comments first | nb 04 |
+| R17 | The model learns inspector writing style, or the 2018 wording shift, instead of risk | ✅ Tags are only in `violdesc` (not used); inspector emails and phones masked; text gain stable 2022–24, correlation with local strictness 0.26, gain not concentrated in strict areas. Some phrases look like inspector habits; can't be ruled out without inspector IDs | nb 04 |
+| R18 | **Personal data in a public repo**: owner and contact names; names inside free-text comments | ✅ Names dropped / hashed at load (asserted). nb 04: emails, phones, titled and role-named persons masked before modelling; every displayed term and snippet passes a name scan (asserted) | nb 01 onward, assert |
 | **Compute and environment** | | | |
 | R19 | System Python is 3.9; the libraries need ≥ 3.10 | ✅ Resolved Nov 10: `.venv` on Homebrew Python 3.14.10, kernel "Python 3.14 (boston-inspections)", `libomp` installed for LightGBM. Versions printed in each notebook's first cell | setup |
 | R20 | CSV is large (likely several hundred MB; about 2–3 GB in pandas) | ✅ 388 MB file, 516 MB in memory; read once as text, saved as Parquet | nb 01 |
-| R21 | Fine-tuning is slow on a laptop | Apple-Silicon `mps` is confirmed working (torch 2.15); time one epoch on a subsample first; Colab or frozen embeddings as a fallback | nb 04 |
+| R21 | Fine-tuning is slow on a laptop | ✅ Timed first: DistilBERT ≈ 1.3 h estimate for the E3 backtest on `mps`, ModernBERT ≈ 3.8 h. The real run took 9.3 h wall-clock (machine sleep/throttling; the largest fold matched the estimate). Use `caffeinate -i` or a GPU next time | nb 04 |
 | R22 | Weather source needs a NOAA token | Downloaded without a token, but **not used**: visit-day weather isn't known when the monthly list is made (R25) | — |
 | R23 | Results not reproducible (seeds, hidden notebook state) | ✅ Fixed `SEED` (including solver seeds; an unseeded L1 solver was found and pinned in nb 03b); Restart & Run All before every handoff; nb 03b reproduces nb 03 exactly and gives byte-identical logs across runs | every nb |
 | R24 | `issdttm` is not the original issue date (51% of licenses issued more than 30 days *after* their first inspection) | ✅ Not used; experience = days since the license's first recorded visit | nb 01 |
@@ -238,3 +261,6 @@ fails.
 | 2026-11-11 | Two-week replay appended to nb 03b (§8) rather than a new notebook. Result: gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); the within-month stability concern is bounded at two weeks |
 | 2026-11-11 | **Phase 2: GO.** Inspector-comment experiments approved; not started until instructed. Pick-up list P1–P12 in Phases |
 | 2026-11-11 | Docs updated to model (b): README Phase 1 results now report 2024 (clean year); the README chart is drawn from model (b) in nb 03b §9 (moved from nb 03 §5, so re-running nb 03 cannot overwrite it) |
+| 2026-11-11 | Phase 2 started on `main` (author's contributions go directly to `main`; workflow wording unchanged) |
+| 2026-11-11 | nb 04 run (pending review): text enters by stacking (out-of-fold text score as one extra input to model (b)); E1 TF-IDF kept, E2 and E3 add nothing, stop rule met. Decisions D1–D4 open |
+| 2026-11-11 | nb 04 reviewed. D1: model (b) + TF-IDF primary, model (b) pre-declared secondary for nb 05. D2: transformer work paused (E4 not run). D3: README, TECHNICAL.md, PLAN.md updated with the findings. D4: nb 05 approved after its effort estimate; paused until the author says go |
