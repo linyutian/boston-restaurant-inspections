@@ -61,6 +61,16 @@ only):
 | **Machine-learning model** | **33.8%** | **5.8 days** |
 | Perfect hindsight (the ceiling) | 43.2% | — |
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_capture_curve_dark.png">
+  <img src="results/figures/readme_capture_curve_light.png" width="720" alt="Share of each month's Priority violations found as inspectors work through the month's list, 2022–2024. By the halfway point, today's order has found 50% of them, the simple rule 72%, the machine-learning model 78%, and perfect hindsight 100%.">
+</picture>
+
+*How to read it:* each line follows inspectors through a month's list and shows how many of that
+month's serious violations they have found so far. Every order finds them all by the end of the
+month; the higher the line, the sooner they are found. By the halfway point, today's order has
+found half of them, the simple rule 72%, and the model 78%.
+
 - **The city's current order carries no risk information** within the month. A simple rule
   already finds far more violations early.
 - **The model adds about 3 more Priority violations found per 100 early visits** on top of the rule,
