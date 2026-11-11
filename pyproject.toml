@@ -1,0 +1,28 @@
+[project]
+name = "inspections"
+version = "0.1.0"
+description = "Risk-ranked routine food inspections for Boston"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "scikit-learn",
+    "lightgbm",
+    "matplotlib",
+    "jupyterlab",
+    "ipykernel",
+    "nbconvert",
+    "pytest",
+]
+
+[project.optional-dependencies]
+# Phase 2: text models (fine-tuning runs best on a GPU, e.g. Colab)
+dl = ["torch", "transformers", "sentence-transformers"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

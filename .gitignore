@@ -1,0 +1,19 @@
+# local data and model artifacts: reproducible from code, never committed
+data/
+models/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# secrets (API tokens)
+.env
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
