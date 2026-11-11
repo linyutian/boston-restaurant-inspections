@@ -16,10 +16,11 @@ problems per visit, and the public is exposed to hazards for fewer days.
   violation**, the FDA Food Code category for hazards that directly cause foodborne illness
   (holding temperatures, cross-contamination, handwashing, sanitizing). We use only information
   known **before the month starts**:
-  - the establishment's own inspection record and the types of violations it had,
-  - its owner's other establishments,
-  - nearby 311 complaints and rodent reports,
+  - the establishment's own inspection record and its recent trend,
   - how strict recent inspections have been in its area.
+
+  Other signals (its owner's other establishments, nearby 311 complaints, violation types, season)
+  were tested and added nothing.
 - **The action:** sort the month's list by the score and visit the highest-risk places first.
 - **What stays fixed:** the number of inspections, and who is due. The city's schedule still
   decides who is due; we change only the **order** within the month.
@@ -39,8 +40,8 @@ never saw, and compared with today's order and with simple rules a city analyst 
 without machine learning.
 
 - **Phase 1 · structured data.** Classic machine learning on each establishment's inspection
-  history, its violation types, its owner's other establishments, nearby complaints, and recent
-  inspection outcomes in its area.
+  history and on recent inspection outcomes in its area; more complex models, tuning and extra
+  signals were tested along the way.
 - **Phase 2 · inspector comments.** Language models, from simple keyword models to a fine-tuned
   transformer, read the notes inspectors wrote at earlier visits and are added to the Phase 1
   model.
@@ -51,33 +52,34 @@ How the data was prepared, how the metric was chosen, and what the results assum
 ## Results
 
 ### Phase 1 · structured data
-Tested on 2022–2024 (about 17,000 routine inspections, each year predicted from earlier years
-only):
+Tested on 2024 (about 5,600 routine inspections), with models trained on 2020–2023 only. No model or
+setting was chosen using 2024, so it is a clean test:
 
 | Order of visits within the month | Share of first-half visits that find a Priority violation | Violations found earlier than today |
 |---|---|---|
-| Today's order | 21.5% | — |
-| Simple rule: places whose previous inspection found a Priority violation or failed go first | 31.0% | 4.1 days |
-| **Machine-learning model** | **33.8%** | **5.8 days** |
-| Perfect hindsight (the ceiling) | 43.2% | — |
+| Today's order | 23.8% | — |
+| Simple rule: places whose previous inspection found a Priority violation or failed go first | 32.4% | 3.4 days |
+| **Machine-learning model** | **34.8%** | **4.9 days** |
+| Perfect hindsight (the ceiling) | 46.5% | — |
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_capture_curve_dark.png">
-  <img src="results/figures/readme_capture_curve_light.png" width="720" alt="Share of each month's Priority violations found as inspectors work through the month's list, 2022–2024. By the halfway point, today's order has found 50% of them, the simple rule 72%, the machine-learning model 78%, and perfect hindsight 100%.">
+  <img src="results/figures/readme_capture_curve_light.png" width="720" alt="Share of each month's Priority violations found as inspectors work through the month's list, 2024. By the halfway point, today's order has found 51% of them, the simple rule 70%, the machine-learning model 75%, and perfect hindsight 100%.">
 </picture>
 
 *How to read it:* each line follows inspectors through a month's list and shows how many of that
 month's serious violations they have found so far. Every order finds them all by the end of the
 month; the higher the line, the sooner they are found. By the halfway point, today's order has
-found half of them, the simple rule 72%, and the model 78%.
+found about half of them, the simple rule 70%, and the model 75%.
 
 - **The city's current order carries no risk information** within the month. A simple rule
   already finds far more violations early.
-- **The model adds about 3 more Priority violations found per 100 early visits** on top of the rule,
-  consistently in every year and for every type of establishment, and its risk scores are well
-  calibrated.
-- **The simplest model worked best.** More complex models did no better: the limit is the
-  information in the data, not the algorithm.
+- **The model adds about 2.5 more Priority violations found per 100 early visits** on top of the
+  rule. The gain is similar in 2022 and 2023, holds when visits may move only two weeks, and the
+  risk scores are well calibrated.
+- **The simplest model worked best.** More complex models, careful tuning and extra signals did no
+  better: the limit is the information in the data, not the algorithm. The final model is a
+  logistic regression on 33 inputs.
 - **Besides an establishment's own record, how strict recent inspections have been nearby matters.**
   This likely reflects inspectors as much as kitchens, a point to handle carefully in any use.
 - **What the model misses is mostly surprises:** places with clean records whose kitchens slipped.

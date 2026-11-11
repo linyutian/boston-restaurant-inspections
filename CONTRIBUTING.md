@@ -34,8 +34,9 @@ don't overwrite old snapshots. Then run the notebooks in order; notebook 01 buil
 ## Rules
 1. **Decision-time features only.** A feature for a visit may use only data from before the first
    day of the visit's month. The truncation and timestamp checks in notebook 03 must pass.
-2. **The test period (2025-01 → 2026-10) is evaluated once**, at the end of Phase 2. Compare models
-   on the rolling 2022–24 backtest.
+2. **The test period (2025-01 → 2026-10) is evaluated once**, at the end of Phase 2. Choose models
+   and settings on the 2022–23 backtest folds, and judge them on 2024, which is never used for
+   selection.
 3. **Every notebook runs top to bottom** (Restart & Run All) before it is committed, so saved
    outputs are real and in order. Checks use `assert`, so a failure stops the notebook.
 4. **Log every model run** in `results/experiments.csv` (date, notebook, model, HR@50, comparisons,

@@ -12,40 +12,38 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 
 ## Status and next steps
 **Where we are**
-- **Phase 1 (tabular) done:** notebooks 01–03 and 03b. **Adopted model: simplified 33-feature
-  logistic regression (model b).** On the clean year 2024 it beats Rule 1 by +2.4 hits per 100
-  visits (+2.5 on two-week blocks), narrowly under the +3 exit bar. Tuning added nothing; the gain
-  holds on two-week blocks (TECHNICAL.md §4, §7). The README results still quote the notebook-03
-  model (see the open item below).
-- **Review:** notebooks 01–03 ✅ reviewed. Changes applied during the review:
-  - Rule 2 explained, with the hit rate at each score level;
-  - capture-curve reading added under the chart;
-  - comparators renamed (Rule 1 / Rule 2 are our proposals; only current practice is the city's).
-
-- **Documentation:** README (public, high-level: problem statement, approach by phase, Phase 1
-  results, Phase 2 expectations) · TECHNICAL.md (methodology, first pass, extended as the review
-  goes) · CONTRIBUTING.md (how to work) · this file.
-- **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections) (private). Phase 1 work and the docs are pushed; from here, one commit per reviewed notebook or change set.
-- **Open item:** the README's Phase 1 results (table and chart) still show the 55-feature notebook-03
-  model (33.8% pooled). To reflect the adopted model (b): update the table and regenerate the chart
-  from model (b), presented on the clean year 2024, since its pooled figure is slightly flattered.
-  Awaiting your go-ahead.
+- **Phase 1 (tabular) done and reviewed:** notebooks 01, 02, 03 and 03b.
+  - **Adopted model (b):** a simplified logistic regression on 33 features.
+  - **On the clean year 2024:** 34.8% first-half hit rate vs 32.4% for Rule 1, i.e. +2.4 hits per
+    100 visits [+1.5, +3.5]; hits found 4.9 vs 3.4 days earlier. The gain holds on two-week blocks
+    (+2.5).
+  - **Exit bar (+3) narrowly not met.** Neither complex models nor tuning moved it.
+  - TECHNICAL.md §4 and §7; README results.
+- **Phase 2: GO** (decided 2026-11-11). **Not started**; it begins on your instruction. Pick-up
+  list below.
+- **Documentation** is consistent with the latest run:
+  - README: problem statement, approach, Phase 1 results on 2024 with the chart from model (b),
+    Phase 2 expectations;
+  - TECHNICAL.md: methodology, living document;
+  - CONTRIBUTING.md: how to work;
+  - this file.
+- **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections)
+  (private), with collaborators Jess-Bezof and carlarus99 invited (write access).
+- **Open, not blocking Phase 2:** branch protection on `main` needs GitHub Pro for a private repo.
+  Options: free Pro via the GitHub Student Developer Pack (recommended), paid Pro, going public, or a
+  soft local guard. Waiting on your choice.
 
 **What's next, in order**
-1. ✅ **Review of notebooks 01–03:** done (2026-11-11).
-2. ✅ **Tuning round, Tier A** (notebook 03b, 2026-11-11). Tuning did not improve the model
-   (−0.2 [−0.6, +0.2] on the clean year 2024); a simpler 33-feature model is equally good. Exit bar
-   still not met (+2.4 on 2024). Tiers B and C were not run (see Judgment calls). ✅ **Decided:**
-   the simplified 33-feature model (b) is the Phase 1 model.
-3. ✅ **Two-week replay** (notebook 03b §8, 2026-11-11). Model (b)'s gain over Rule 1 holds when no
-   visit moves more than two weeks: +2.5 vs +2.4 monthly (2024); headroom share 50% vs 48%. The
-   results don't rely on month-long stability. "Days earlier" halves by construction (2.4 vs 4.9).
-4. **Phase 2 go / no-go:** decide whether to start the inspector-comment experiments.
-   Recommendation: **go**. Tuning has been ruled out as a lever, and the evaluation design has been
-   stress-tested (two-week replay). Phase 2 is part of the project design, and the remaining misses
-   need information the counts don't have. Expectations are in the README. **This is the next
-   decision.**
-5. **Phase 2, then the one-time test** (notebook 05), then Phase 3.
+1. ✅ Review of notebooks 01–03 (2026-11-11).
+2. ✅ Tuning round, Tier A (nb 03b §1–§7). No gain from tuning (−0.2 [−0.6, +0.2] on 2024).
+   **Model (b) adopted.** Tiers B and C not run (Judgment calls; backlog).
+3. ✅ Two-week replay (nb 03b §8). Gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); "days
+   earlier" halves by construction.
+4. ✅ **Phase 2 go / no-go: GO** (2026-11-11).
+5. **Phase 2:** notebook 04 (text experiments), then notebook 05 (one-time test, impact, fairness).
+   Waiting for your instruction to start.
+6. **Phase 3:** consolidate code into `src/inspections/` with tests, pin dependencies, and complete
+   the README.
 
 ## How we work
 1. **Phases 1 and 2 happen in Jupyter notebooks**, one per step, each reading top to bottom:
@@ -56,7 +54,7 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 3. **Helpers start inside the notebook.** Stable code moves into `src/inspections/` in Phase 3.
 4. **Documentation:** settled reasoning goes in TECHNICAL.md (a living document, extended as you
    review); this file keeps one-line decisions; the README stays high-level.
-5. **Commits:** one per reviewed notebook.
+5. **Commits:** one per reviewed notebook or change set, made on a short-lived branch and fast-forwarded into `main`.
 6. **Environment:** project `.venv` (Homebrew Python 3.14) with all dependencies, kernel
    "Python 3.14 (boston-inspections)".
 
@@ -66,16 +64,18 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | 02 | `02_metric_and_baselines` | How good are current practice and simple rules, and what is the ceiling? | ✅ done · reviewed |
 | 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · reviewed |
 | 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
-| 04 | `04_text_models` | Does inspector-comment text add value? | Phase 2 |
-| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 |
+| 04 | `04_text_models` | Does inspector-comment text add value? | Phase 2 · **go**, not started |
+| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 · not started |
 
 ## Phases
-**Phase 1, tabular (done).** Exit criterion: beat Rule 1 (previous inspection) on the pooled 2022–24 backtest by ≥ 3 hits per
-100 visits with a CI excluding zero. Outcome: +2.9 [+2.3, +3.4], narrowly not met.
+**Phase 1, tabular (done).** Exit criterion: beat Rule 1 by ≥ 3 hits per 100 visits with a CI
+excluding zero.
+- Outcome on the pooled 2022–24 backtest: +2.9 [+2.3, +3.4] (notebook-03 model).
+- After tuning, judged on the clean year 2024: +2.4 [+1.5, +3.5] (adopted model b).
+- Narrowly not met. Phase 2 goes ahead anyway (decision 2026-11-11).
 
-**Phase 2, inspector-comment text (nb 04–05).** Input: comments from the establishment's
-*previous* visits, de-duplicated. Experiments, cheapest first, each kept only if it beats the
-current best on the backtest:
+**Phase 2, inspector-comment text (nb 04–05): GO, not started.** Experiments run cheapest first;
+each is kept only if it beats the current best:
 1. TF-IDF + logistic regression
 2. Frozen sentence embeddings as extra features
 3. Fine-tuned small transformer (DistilBERT / ModernBERT); its out-of-fold score feeds the
@@ -84,6 +84,23 @@ current best on the backtest:
 
 Stop after two experiments in a row add nothing. Then calibrate, retrain on 2020–2024, and run the
 test period once (nb 05), including impact numbers and a fairness check by neighbourhood.
+
+**Phase 2 pick-up list** (flags and queued items collected during Phase 1):
+
+| # | Item | Where it came from | What Phase 2 does |
+|---|---|---|---|
+| P1 | **Baseline = model (b)** (33 features); bar = +3 hits per 100 visits vs Rule 1 | nb 03b §7 | Every text experiment is added on top of model (b) and compared with it *and* with Rule 1 |
+| P2 | **Evaluation protocol:** choose on 2022–23 folds, judge on 2024 (clean), test period once at the end | nb 03b guardrails; CONTRIBUTING rule 2 | Same protocol in nb 04; the 2025–26 test only in nb 05 |
+| P3 | **Pre-check the text signal formally** | README Phase 2 expectations ("8% vs 30%", mice / "repeat" keywords) came from a quick check outside the notebooks | First section of nb 04 reproduces it, and the README is corrected if it doesn't hold |
+| P4 | **Text leakage and de-duplication (R15):** follow-ups repeat earlier comments; the current visit's text gives the answer away | Risk register | Use only comments from visits **before the first day of the month**; de-duplicate; assert it |
+| P5 | **Truncation (R16)** | Risk register | Check token-length distribution; choose how many past visits to include and which end to truncate |
+| P6 | **Inspector style and the 2019 wording change (R17)** | Risk register; local-strictness finding (TECHNICAL.md §8) | Strip Food Code tags such as `(P)`; check performance by year; watch for the text acting as a proxy for *which inspector* rather than *which kitchen* |
+| P7 | **Personal data in comment text (R18)** | Risk register | Scan any comment shown in a notebook output or the README for names before it is displayed |
+| P8 | **Violation-type information returns through text** | nb 03b A4 dropped the violation-mix group | Expect overlap; report text gains *on top of* model (b), which no longer has violation types |
+| P9 | **Compute choice (R21)** | Compute comparison (2026-11-11) | Before fine-tuning, time one epoch on a subsample on this Mac (MPS) and on Colab (T4); pick the faster |
+| P10 | **Explanations** | README Phase 2 expectations | Even if accuracy gains are small, test comment snippets as "why this place is on the list" explanations |
+| P11 | **Fairness check by neighbourhood** | Local-strictness signal; limitations | nb 05: flag rates and hit rates by neighbourhood and income tract |
+| P12 | **Days-earlier depends on the planning period** | nb 03b §8 | Report per-visit lift and days earlier separately; note what a twice-monthly list would add |
 
 **Phase 3, consolidate and publish.** Move stable code into `src/inspections/` with tests, pin
 dependencies, complete the README (final results, implications and next steps).
@@ -164,7 +181,7 @@ fails.
 | R20 | CSV is large (likely several hundred MB; about 2–3 GB in pandas) | ✅ 388 MB file, 516 MB in memory; read once as text, saved as Parquet | nb 01 |
 | R21 | Fine-tuning is slow on a laptop | Apple-Silicon `mps` is confirmed working (torch 2.15); time one epoch on a subsample first; Colab or frozen embeddings as a fallback | nb 04 |
 | R22 | Weather source needs a NOAA token | Downloaded without a token, but **not used**: visit-day weather isn't known when the monthly list is made (R25) | — |
-| R23 | Results not reproducible (seeds, hidden notebook state) | Fixed `SEED`; Restart & Run All before every handoff; manifest SHA-256 printed | every nb |
+| R23 | Results not reproducible (seeds, hidden notebook state) | ✅ Fixed `SEED` (including solver seeds; an unseeded L1 solver was found and pinned in nb 03b); Restart & Run All before every handoff; nb 03b reproduces nb 03 exactly and gives byte-identical logs across runs | every nb |
 | R24 | `issdttm` is not the original issue date (51% of licenses issued more than 30 days *after* their first inspection) | ✅ Not used; experience = days since the license's first recorded visit | nb 01 |
 | R25 | **Decision-time leakage**: features measured at the visit date (days since last visit, visit-day weather) encode the visit order being evaluated | ✅ All features as of the first day of the visit's month; truncation test (features identical when later data is deleted) and timestamp test | nb 02–03, assert |
 
@@ -185,6 +202,9 @@ fails.
 | Online review text as a third modality | Blocked | Only if a licensed dataset turns up |
 | Inspector-level effects | Needs city data | Inspector ID is not public |
 | Mobile food (MFW) | ~1 day | Too few inspections today |
+| Tuning Tier B: wider LightGBM search, class weighting, training window, keyword groups | ~1.5 h | Not run (agreed scope was Tier A); low expected value given the flat Tier A results |
+| Tuning Tier C: sensitivity of the definitions (cycle gap, irregular cut-off, complaint matching) | 2–3 h | Deferred; robustness rather than performance. Notebook 01 already showed the prediction set barely moves |
+| Complaint triage with the same score | ~½ day | Out of scope (2026-11-10); only if the city wants complaint urgency ranked |
 
 ## Decisions
 | Date | Decision |
@@ -216,3 +236,5 @@ fails.
 | 2026-11-11 | README capture-curve chart added (generated by notebook 03 §5) |
 | 2026-11-11 | **Phase 1 model = model (b):** simplified 33-feature logistic regression (C = 0.003, L2; 1 km, 90 + 180 days; last N = 2; 311, owner, violation-mix and calendar groups dropped). Replaces the 55-feature notebook-03 model; logged in nb 03b §7 |
 | 2026-11-11 | Two-week replay appended to nb 03b (§8) rather than a new notebook. Result: gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); the within-month stability concern is bounded at two weeks |
+| 2026-11-11 | **Phase 2: GO.** Inspector-comment experiments approved; not started until instructed. Pick-up list P1–P12 in Phases |
+| 2026-11-11 | Docs updated to model (b): README Phase 1 results now report 2024 (clean year); the README chart is drawn from model (b) in nb 03b §9 (moved from nb 03 §5, so re-running nb 03 cannot overwrite it) |

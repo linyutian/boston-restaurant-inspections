@@ -265,7 +265,7 @@ would automatically look "longer ago" than one visited on the 2nd, encoding the 
 evaluated. For the same reason, **visit-day weather is not used**; month-of-year captures
 seasonality. → nb 03 §1
 
-**Feature groups** (55 features) → nb 03 §2:
+**Feature groups** (55 features tested; the adopted model keeps 33) → nb 03 §2:
 
 | Group | Contents |
 |---|---|
@@ -276,6 +276,11 @@ seasonality. → nb 03 §1
 | 311 nearby | food complaints and rodent reports within 100 m, prior 90 / 365 days |
 | area recent rates | severe and fail rates of routine visits at *any* establishment within 1 km, prior 90 / 180 days |
 | calendar & place | license type, month of year, pandemic period, latitude / longitude |
+
+**Adopted model (b): 33 features in three groups:** history (18), recent trend (9, using the last
+N = 2 routine visits) and area recent rates (6, within 1 km over 90 and 180 days). The 311-nearby,
+owner, violation-mix and calendar & place groups were dropped in the tuning round at no measurable
+cost. → nb 03b §5
 
 **Leakage tests** (all assert, so a notebook stops on failure) → nb 03 §2.3:
 - **Truncation:** rebuild the features after deleting every visit and complaint from 1 July 2023
