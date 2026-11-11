@@ -12,10 +12,11 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 
 ## Status and next steps
 **Where we are**
-- **Phase 1 (tabular) done:** notebooks 01–03 and 03b. Logistic regression beats Rule 1 (previous
-  inspection) by +2.9 hits per 100 visits [+2.3, +3.4], narrowly under the +3 exit bar; the Tier A
-  tuning round (03b) added nothing but showed a 33-feature model is equally good (TECHNICAL.md §7).
-  Phase 1 results are in the README.
+- **Phase 1 (tabular) done:** notebooks 01–03 and 03b. **Adopted model: simplified 33-feature
+  logistic regression (model b).** On the clean year 2024 it beats Rule 1 by +2.4 hits per 100
+  visits (+2.5 on two-week blocks), narrowly under the +3 exit bar. Tuning added nothing; the gain
+  holds on two-week blocks (TECHNICAL.md §4, §7). The README results still quote the notebook-03
+  model (see the open item below).
 - **Review:** notebooks 01–03 ✅ reviewed. Changes applied during the review:
   - Rule 2 explained, with the hit rate at each score level;
   - capture-curve reading added under the chart;
@@ -25,20 +26,25 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
   results, Phase 2 expectations) · TECHNICAL.md (methodology, first pass, extended as the review
   goes) · CONTRIBUTING.md (how to work) · this file.
 - **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections) (private). Phase 1 work and the docs are pushed; from here, one commit per reviewed notebook or change set.
+- **Open item:** the README's Phase 1 results (table and chart) still show the 55-feature notebook-03
+  model (33.8% pooled). To reflect the adopted model (b): update the table and regenerate the chart
+  from model (b), presented on the clean year 2024, since its pooled figure is slightly flattered.
+  Awaiting your go-ahead.
 
 **What's next, in order**
 1. ✅ **Review of notebooks 01–03:** done (2026-11-11).
 2. ✅ **Tuning round, Tier A** (notebook 03b, 2026-11-11). Tuning did not improve the model
    (−0.2 [−0.6, +0.2] on the clean year 2024); a simpler 33-feature model is equally good. Exit bar
-   still not met (+2.4 on 2024). Tiers B and C were not run (see Judgment calls). **Decision for
-   you:** carry forward the notebook-03 model or the simplified 33-feature model (recommended).
-3. **Two-week replay** (new section in notebook 03, after §5): the same comparison (current
-   practice, Rule 1, model, oracle) on two-week blocks, so no visit moves more than about 7 days.
-   It bounds how much the results rely on within-month stability (TECHNICAL.md §4).
+   still not met (+2.4 on 2024). Tiers B and C were not run (see Judgment calls). ✅ **Decided:**
+   the simplified 33-feature model (b) is the Phase 1 model.
+3. ✅ **Two-week replay** (notebook 03b §8, 2026-11-11). Model (b)'s gain over Rule 1 holds when no
+   visit moves more than two weeks: +2.5 vs +2.4 monthly (2024); headroom share 50% vs 48%. The
+   results don't rely on month-long stability. "Days earlier" halves by construction (2.4 vs 4.9).
 4. **Phase 2 go / no-go:** decide whether to start the inspector-comment experiments.
-   Recommendation: **go**. Tuning has now been ruled out as a lever; Phase 2 is part of the project
-   design; and the remaining misses need information the counts don't have. Expectations are in the
-   README.
+   Recommendation: **go**. Tuning has been ruled out as a lever, and the evaluation design has been
+   stress-tested (two-week replay). Phase 2 is part of the project design, and the remaining misses
+   need information the counts don't have. Expectations are in the README. **This is the next
+   decision.**
 5. **Phase 2, then the one-time test** (notebook 05), then Phase 3.
 
 ## How we work
@@ -59,7 +65,7 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | 01 | `01_data_and_labels` | What is one inspection, a routine visit, a hit? | ✅ done · reviewed |
 | 02 | `02_metric_and_baselines` | How good are current practice and simple rules, and what is the ceiling? | ✅ done · reviewed |
 | 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · reviewed |
-| 03b | `03b_tuning_round` | Do the untuned judgment calls (Tier A) close the gap to the +3 bar? | ✅ done · no gain; simpler model equally good |
+| 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
 | 04 | `04_text_models` | Does inspector-comment text add value? | Phase 2 |
 | 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 |
 
@@ -112,7 +118,7 @@ Scope run so far: **Tier A only** (agreed 2026-11-11). Outcomes are in the last 
 | Label start | 2020 | nb 01 §8 | **test** | fixed by the Food Code change; no tuning |
 | **Evaluation design (how it is judged)** | | | | |
 | First-half cut | 50% | nb 02 | **test** | capture curve already reported at 5–100% |
-| Planning period | monthly | nb 02 | **test** | the queued two-week replay |
+| Planning period | monthly | nb 02 | **test** | two-week replay · **done (03b §8): per-visit gain unchanged (+2.5 vs +2.4); days earlier halves** |
 | Exit bar | +3 hits per 100 visits | nb 02 | **fixed by design** | changing it after seeing results would defeat its purpose |
 | **Comparators** | | | | |
 | Rule 2 (points checklist) weights | +2 / +1 / +1 / +1 | nb 02 §4 | **fixed by design** | it represents a no-data checklist. Optional extra comparator: a *learned* scorecard (logistic regression on the same four items) |
@@ -120,8 +126,8 @@ Scope run so far: **Tier A only** (agreed 2026-11-11). Outcomes are in the last 
 ## Known weak points
 1. **Gains over the best rule are modest** (about +3 per 100 visits). The rule itself is a valid
    recommendation; ML has to earn its place.
-2. **Within-month stability is assumed** by the evaluation; gains are likely somewhat optimistic
-   (the queued two-week replay bounds this).
+2. **Stability over up to two weeks is assumed** by the evaluation. The two-week replay showed the
+   gains don't depend on month-long stability; only a live pilot removes the assumption entirely.
 3. **Part of the signal is the inspector, not the kitchen** (local strictness), which raises a
    fairness and communication question.
 4. **The text phase may add little;** the cheapest-first ladder and stop rule limit the cost.
@@ -208,3 +214,5 @@ fails.
 | 2026-11-11 | Tuning round scoped to Tier A; exit verdict judged on the clean year 2024; run in a separate notebook (03b) |
 | 2026-11-11 | Tuning round result: no gain from tuning (−0.2 [−0.6, +0.2] on 2024); simplified 33-feature model equally good; exit bar not met (+2.4 on 2024) |
 | 2026-11-11 | README capture-curve chart added (generated by notebook 03 §5) |
+| 2026-11-11 | **Phase 1 model = model (b):** simplified 33-feature logistic regression (C = 0.003, L2; 1 km, 90 + 180 days; last N = 2; 311, owner, violation-mix and calendar groups dropped). Replaces the 55-feature notebook-03 model; logged in nb 03b §7 |
+| 2026-11-11 | Two-week replay appended to nb 03b (§8) rather than a new notebook. Result: gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); the within-month stability concern is bounded at two weeks |

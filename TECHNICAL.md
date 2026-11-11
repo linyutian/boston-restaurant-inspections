@@ -172,7 +172,7 @@ how far down the month's list inspectors have gone (horizontal axis), averaged o
   there, vs about 50% for current practice and 100% for the oracle.
 - **It shows the choice of cut doesn't matter;** the order of the methods is the same at 25% or 75%.
   It does *not* address how often the list should be made (monthly vs. every two weeks); that is a
-  question about the planning period, tested separately (§4 assumptions).
+  question about the planning period, tested separately (§4 assumptions, two-week replay).
 - HR@50 and the curve are two views of the same quantity: the curve gives the share of **all the
   month's hits** found by the first half; HR@50 gives the share of **first-half visits** that found
   one.
@@ -202,13 +202,19 @@ how far down the month's list inspectors have gone (horizontal axis), averaged o
    (0–1 points). → nb 02 §4
    It fails for sudden events (e.g. a cooler that breaks late in the month), which a re-ordered
    early visit would not have found.
-3. **Direction of bias.** Where assumption 2 fails, the replay credits the model with hits it would
-   not have found in practice. The measured gains are therefore likely **somewhat optimistic**. A
-   two-week replay (no visit moves more than about 7 days) is planned to bound this (see
-   [PLAN.md](PLAN.md)), and a live pilot (one district uses the list, another doesn't) is the real
-   test.
-4. **Monthly planning.** The list is assumed to be made once a month. A weekly list would allow
-   fresher inputs, but the evaluation logic is the same.
+3. **Direction of bias, and how large it is.** Where assumption 2 fails, the replay credits the
+   model with hits it would not have found in practice. The **two-week replay** bounds this: each
+   month is split into two blocks, and visits are re-ranked only within a block, so no visit moves
+   more than two weeks. If many Priority problems appeared or vanished within weeks, the gains would
+   shrink. They don't. The adopted model's gain over Rule 1 is +2.5 per 100 visits on two-week
+   blocks vs +2.4 monthly (2024), and its share of the headroom is 50% vs 48%. The concern is bounded
+   at the two-week scale; stability over two weeks is still assumed, and a live pilot (one district
+   uses the list, another doesn't) remains the real test. → nb 03b §8
+4. **Planning period.** The list is assumed to be made once a month. The two-week replay shows that
+   the *per-visit* lift is the same for twice-monthly lists. "Days earlier", however, scales with how
+   far a list can move visits: about 2.4 days on two-week blocks vs 4.9 monthly in 2024. A more
+   frequent list would also allow fresher inputs; the replay kept start-of-month scores, so it is
+   conservative.
 
 ---
 
@@ -304,7 +310,8 @@ Pooled backtest 2022–24 (17,354 routine visits, 36 months) → nb 03 §4:
 - **The simplest model is the best.** Tuning, a ranking objective and a longer training window all
   land within 0.7 points of logistic regression, and the tuning surface is flat (top six
   configurations within 0.002 PR-AUC). **The information, not the algorithm, is the limit.** By the
-  rule "simplest model within noise of the best", the Phase 1 model is **logistic regression**.
+  rule "simplest model within noise of the best", the Phase 1 model is **logistic regression**,
+  later simplified to 33 features in the tuning round (below).
 - **What drives the score:** the establishment's own record (recency-weighted and lifetime severe
   and fail rates, recent violation counts), **how strict recent inspections have been within
   1 km**, and experience (longer-known licenses are lower-risk). The local-strictness group is the
@@ -341,6 +348,12 @@ judged there. → nb 03b
   information, not the modelling, sets the ceiling.
 - **A simpler model is equally good:** the 33-feature version matches the 55-feature one.
 - **Exit criterion: not met** on 2024 (+2.4; the notebook 03 model is +2.6 on 2024 alone).
+- **Adopted Phase 1 model (decided 2026-11-11): the simplified 33-feature logistic regression**
+  (C = 0.003, L2; local rates within 1 km over 90 + 180 days; last N = 2; without the 311, owner,
+  violation-mix and calendar groups). It replaces the 55-feature notebook 03 model, by the rule
+  "simplest model within noise of the best", and is the baseline Phase 2 must improve on. On 2024:
+  34.8% first-half hit rate, +2.4 [+1.5, +3.5] vs Rule 1, hits found 4.9 days earlier (Rule 1: 3.4).
+- **Robustness:** the gain holds on two-week blocks (+2.5, §4). → nb 03b §8
 
 ### Phase 2: inspector-comment text
 *To be added.*
@@ -356,8 +369,9 @@ judged there. → nb 03b
 - **Some complaints are invisible.** Only 311 complaints can be matched; complaints made directly to
   the health department are not in the data, so a few complaint-driven visits remain in the
   prediction set.
-- **Within-month stability is assumed** (§4). Gains are likely somewhat optimistic; a live pilot is
-  the real test.
+- **Stability over up to two weeks is assumed** (§4). The two-week replay shows the gains do not
+  rely on month-long stability, but the shorter-scale assumption remains; a live pilot is the real
+  test.
 - **No counterfactuals beyond the month.** The evaluation cannot say what would happen if different
   establishments were inspected, only what happens when the same ones are re-ordered.
 - **History resets with new licenses.** Ownership changes create new license numbers, and
