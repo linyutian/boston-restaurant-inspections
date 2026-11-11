@@ -25,7 +25,7 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 - **Documentation:** README (public, high-level: problem statement, approach by phase, Phase 1
   results, Phase 2 expectations) · TECHNICAL.md (methodology, first pass, extended as the review
   goes) · CONTRIBUTING.md (how to work) · this file.
-- **Nothing committed yet.** One commit per reviewed notebook, plus the docs.
+- **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections) (private). Phase 1 work and the docs are pushed; from here, one commit per reviewed notebook or change set.
 
 **What's next, in order**
 1. **Finish the review** of notebooks 02 and 03, and apply your feedback (including additions to
@@ -201,3 +201,4 @@ fails.
 | 2026-11-10 | Tuning round queued: judgment calls split into *tune* (model, features), *test* (definitions, evaluation design) and *fixed by design* (exit bar, Rule 2 weights) |
 | 2026-11-10 | Rule 2 weights stay hand-set (no tuning); explained in nb 02 §4 with the hit rate per score level |
 | 2026-11-10 | README gets an approach-by-phase summary, Phase 1 results and Phase 2 expectations; TECHNICAL.md stays methodology-only |
+| 2026-11-10 | GitHub repository created as **private**; can be made public once the work is final |
