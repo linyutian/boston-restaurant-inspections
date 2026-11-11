@@ -12,34 +12,33 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 
 ## Status and next steps
 **Where we are**
-- **Phase 1 (tabular) done:** notebooks 01–03. Logistic regression beats Rule 1 (previous
-  inspection) by +2.9 hits per 100 visits [+2.3, +3.4], narrowly under the +3 exit bar
-  (TECHNICAL.md §7). Phase 1 results are in the README.
-- **Review:** notebook 01 ✅ reviewed. Notebook 02 review in progress: §1–§5 discussed, with these
-  changes applied:
+- **Phase 1 (tabular) done:** notebooks 01–03 and 03b. Logistic regression beats Rule 1 (previous
+  inspection) by +2.9 hits per 100 visits [+2.3, +3.4], narrowly under the +3 exit bar; the Tier A
+  tuning round (03b) added nothing but showed a 33-feature model is equally good (TECHNICAL.md §7).
+  Phase 1 results are in the README.
+- **Review:** notebooks 01–03 ✅ reviewed. Changes applied during the review:
   - Rule 2 explained, with the hit rate at each score level;
   - capture-curve reading added under the chart;
   - comparators renamed (Rule 1 / Rule 2 are our proposals; only current practice is the city's).
 
-  Notebook 03 is not yet reviewed.
 - **Documentation:** README (public, high-level: problem statement, approach by phase, Phase 1
   results, Phase 2 expectations) · TECHNICAL.md (methodology, first pass, extended as the review
   goes) · CONTRIBUTING.md (how to work) · this file.
 - **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections) (private). Phase 1 work and the docs are pushed; from here, one commit per reviewed notebook or change set.
 
 **What's next, in order**
-1. **Finish the review** of notebooks 02 and 03, and apply your feedback (including additions to
-   TECHNICAL.md).
-2. **Tuning round for judgment calls** (new experiment E7 in notebook 03): tune the settings marked
-   "tune" in [Judgment calls](#judgment-calls-tune-or-test) on the backtest, run the sensitivity
-   checks marked "test", and log every run. Expected gain: modest (the notebook 03 tuning surface
-   was flat), but the exit bar was missed by only 0.1.
+1. ✅ **Review of notebooks 01–03:** done (2026-11-11).
+2. ✅ **Tuning round, Tier A** (notebook 03b, 2026-11-11). Tuning did not improve the model
+   (−0.2 [−0.6, +0.2] on the clean year 2024); a simpler 33-feature model is equally good. Exit bar
+   still not met (+2.4 on 2024). Tiers B and C were not run (see Judgment calls). **Decision for
+   you:** carry forward the notebook-03 model or the simplified 33-feature model (recommended).
 3. **Two-week replay** (new section in notebook 03, after §5): the same comparison (current
    practice, Rule 1, model, oracle) on two-week blocks, so no visit moves more than about 7 days.
    It bounds how much the results rely on within-month stability (TECHNICAL.md §4).
-4. **Phase 2 go / no-go:** after steps 2–3, decide whether to start the inspector-comment
-   experiments. Current recommendation: go. Phase 2 is part of the project design, and the
-   remaining misses need information the counts don't have. Expectations are in the README.
+4. **Phase 2 go / no-go:** decide whether to start the inspector-comment experiments.
+   Recommendation: **go**. Tuning has now been ruled out as a lever; Phase 2 is part of the project
+   design; and the remaining misses need information the counts don't have. Expectations are in the
+   README.
 5. **Phase 2, then the one-time test** (notebook 05), then Phase 3.
 
 ## How we work
@@ -58,8 +57,9 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | # | Notebook | Question | Status |
 |---|---|---|---|
 | 01 | `01_data_and_labels` | What is one inspection, a routine visit, a hit? | ✅ done · reviewed |
-| 02 | `02_metric_and_baselines` | How good are current practice and simple rules, and what is the ceiling? | ✅ done · in review |
-| 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · not yet reviewed |
+| 02 | `02_metric_and_baselines` | How good are current practice and simple rules, and what is the ceiling? | ✅ done · reviewed |
+| 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · reviewed |
+| 03b | `03b_tuning_round` | Do the untuned judgment calls (Tier A) close the gap to the +3 bar? | ✅ done · no gain; simpler model equally good |
 | 04 | `04_text_models` | Does inspector-comment text add value? | Phase 2 |
 | 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 |
 
@@ -90,23 +90,25 @@ Every value set by judgment or heuristic rather than learned. The split matters:
   score would move the goalposts, so we only check that conclusions hold when they change.
 - **Fixed by design:** values that must stay fixed for a comparison to mean anything.
 
-| Judgment call | Current value | Where | Action | Search range / check |
+Scope run so far: **Tier A only** (agreed 2026-11-11). Outcomes are in the last column.
+
+| Judgment call | Current value | Where | Action | Search range / check · **outcome** |
 |---|---|---|---|---|
 | **Model hyperparameters** | | | | |
-| Logistic regression strength | `C = 0.1`, L2, *never tuned* | nb 03 E1 | **tune** | C ∈ {0.001 … 10}; L1 vs L2 |
-| LightGBM hyperparameters | 16-trial random search | nb 03 E3 | **tune** | wider search (e.g. 60 trials) incl. `min_child_samples`, `reg_alpha`, `subsample` |
-| Class weighting | none | nb 03 | **tune** | balanced vs none (affects calibration more than ranking) |
+| Logistic regression strength | `C = 0.1`, L2, *never tuned* | nb 03 E1 | **tune** | C ∈ {0.001 … 10}; L1 vs L2 · **A1: flat (all L2 within 0.002); C = 0.003 chosen, no gain on 2024** |
+| LightGBM hyperparameters | 16-trial random search | nb 03 E3 | **tune** | wider search (e.g. 60 trials) incl. `min_child_samples`, `reg_alpha`, `subsample` · *Tier B, not run* |
+| Class weighting | none | nb 03 | **tune** | balanced vs none (affects calibration more than ranking) · *Tier B, not run* |
 | **Feature settings** | | | | |
-| Local-rate radius and windows | 1 km; 90 / 180 days | nb 03 area features | **tune** | 0.5 / 1 / 2 km; 60 / 90 / 180 / 365 days |
-| 311 radius and windows | 100 m; 90 / 365 days | nb 03 | **tune** | 50 / 100 / 250 m; or drop the group (it adds about nothing) |
-| Recency weight of the EWMA rates | α = 0.5 | nb 03 trend | **tune** | 0.2 / 0.35 / 0.5 / 0.7 |
-| "Last N routine visits" window | N = 3 | nb 03 trend | **tune** | 2 / 3 / 5 |
-| Violation keyword groups | 8 groups, hand-written rules | nb 03 §2.1 | **tune** (lightly) | merge or split groups; check coverage stays ≥ 95% |
-| Training window | 2020+ (E5 tried 2012+) | nb 03 | **tune** | 2019+ / 2020+ / 2021+ |
+| Local-rate radius and windows | 1 km; 90 / 180 days | nb 03 area features | **tune** | 0.5 / 1 / 2 km; 90 / 180 / 365 days · **A2: 1 km, 90 + 180 days (unchanged) is best; 2 km clearly worse** |
+| 311 radius and windows | 100 m; 90 / 365 days | nb 03 | **tune** | 50 / 100 / 250 m; or drop the group · **A4: group dropped (no loss)** |
+| Recency weight of the EWMA rates | α = 0.5 | nb 03 trend | **tune** | 0.2 / 0.35 / 0.5 / 0.7 · **A3: irrelevant (≤ 0.0001)** |
+| "Last N routine visits" window | N = 3 | nb 03 trend | **tune** | 2 / 3 / 5 · **A3: N = 2 slightly better** |
+| Violation keyword groups | 8 groups, hand-written rules | nb 03 §2.1 | **tune** (lightly) | merge or split groups · *Tier B, not run*; the violation-mix group itself was dropped in A4 (no loss) |
+| Training window | 2020+ (E5 tried 2012+) | nb 03 | **tune** | 2019+ / 2020+ / 2021+ · *Tier B, not run* (notebook 03 E5 showed 2012+ on par) |
 | **Definitions (what is predicted)** | | | | |
-| Cycle gap for a new routine visit | 90 days | nb 01 §6 | **test** | already shown stable for 60–180 days; re-check that results hold |
-| Irregular cut-off | < 30 days after a pass | nb 01 §6 | **test** | 14 / 30 / 45 days |
-| Complaint attribution | nearest within 25 m, 0–30 days | nb 01 §7 | **test** | 15 / 25 / 50 m; 14 / 30 / 45 days |
+| Cycle gap for a new routine visit | 90 days | nb 01 §6 | **test** | already shown stable for 60–180 days · *Tier C, deferred* |
+| Irregular cut-off | < 30 days after a pass | nb 01 §6 | **test** | 14 / 30 / 45 days · *Tier C, deferred* |
+| Complaint attribution | nearest within 25 m, 0–30 days | nb 01 §7 | **test** | 15 / 25 / 50 m; 14 / 30 / 45 days · *Tier C, deferred* |
 | Label start | 2020 | nb 01 §8 | **test** | fixed by the Food Code change; no tuning |
 | **Evaluation design (how it is judged)** | | | | |
 | First-half cut | 50% | nb 02 | **test** | capture curve already reported at 5–100% |
@@ -202,3 +204,7 @@ fails.
 | 2026-11-10 | Rule 2 weights stay hand-set (no tuning); explained in nb 02 §4 with the hit rate per score level |
 | 2026-11-10 | README gets an approach-by-phase summary, Phase 1 results and Phase 2 expectations; TECHNICAL.md stays methodology-only |
 | 2026-11-10 | GitHub repository created as **private**; can be made public once the work is final |
+| 2026-11-11 | Review of notebooks 01–03 complete |
+| 2026-11-11 | Tuning round scoped to Tier A; exit verdict judged on the clean year 2024; run in a separate notebook (03b) |
+| 2026-11-11 | Tuning round result: no gain from tuning (−0.2 [−0.6, +0.2] on 2024); simplified 33-feature model equally good; exit bar not met (+2.4 on 2024) |
+| 2026-11-11 | README capture-curve chart added (generated by notebook 03 §5) |

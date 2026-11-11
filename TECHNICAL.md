@@ -318,6 +318,30 @@ Pooled backtest 2022–24 (17,354 routine visits, 36 months) → nb 03 §4:
 
 **Exit criterion: narrowly not met** (+2.9 vs the +3.0 bar).
 
+### Tuning round (Tier A)
+Four untuned judgment calls were tuned in sequence, each chosen on folds 1–2 (2022–23) by mean
+PR-AUC. 2024 was kept as a clean check: it was never used for selection, so the exit verdict is
+judged there. → nb 03b
+
+| Setting | Tried | Result |
+|---|---|---|
+| Logistic-regression strength | C 0.001–10, L1 / L2 | Flat: all L2 settings within 0.002 PR-AUC; the untuned C = 0.1 was already fine |
+| Local-strictness radius and windows | 0.5 / 1 / 2 km × 90 / 180 / 365 days | 1 km with 90 + 180 days (the original setting) is best; 2 km costs 0.009 and 0.5 km 0.005. The signal is genuinely local |
+| Recency weight; last N visits | α 0.2–0.7; N 2 / 3 / 5 | α irrelevant (≤ 0.0001); N = 2 slightly better |
+| Weak feature groups | drop 311, owner, violation mix, calendar | All droppable within noise: **55 → 33 features** |
+
+| 2024 (clean) | First-half hit rate | vs Rule 1, per 100 visits |
+|---|---|---|
+| Rule 1 · previous inspection | 32.4% | — |
+| Notebook 03 model (55 features) | 35.0% | +2.6 [+1.8, +3.5] |
+| Tuned model (33 features) | 34.8% | +2.4 [+1.5, +3.5] |
+
+- **Tuning did not improve the model:** −0.2 [−0.6, +0.2] against the notebook 03 model on the clean
+  year. Small gains on the selection years did not carry over. This independently confirms that the
+  information, not the modelling, sets the ceiling.
+- **A simpler model is equally good:** the 33-feature version matches the 55-feature one.
+- **Exit criterion: not met** on 2024 (+2.4; the notebook 03 model is +2.6 on 2024 alone).
+
 ### Phase 2: inspector-comment text
 *To be added.*
 

@@ -11,7 +11,7 @@ PLAN.md            working plan: next steps, open questions, backlog, risk regis
 CONTRIBUTING.md    this file
 pyproject.toml     package metadata and dependencies
 src/inspections/   reusable code: config.py (paths, data IDs, split dates), download.py
-notebooks/         the analysis, run in order: 01_data_and_labels, 02_metric_and_baselines, 03_tabular_models, ...
+notebooks/         the analysis, run in order: 01_data_and_labels, 02_metric_and_baselines, 03_tabular_models, 03b_tuning_round, ...
 results/           committed outputs: figures/ and experiments.csv
 data/              local only, git-ignored: raw/ (dated snapshots) and processed/ (built by notebook 01)
 ```
