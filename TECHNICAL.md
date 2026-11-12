@@ -13,6 +13,8 @@ work. Every claim points to the notebook section that shows the evidence.
 6. [Features and leakage safeguards](#6-features-and-leakage-safeguards)
 7. [Models and results](#7-models-and-results)
 8. [Limitations](#8-limitations)
+9. [Implications for use](#9-implications-for-use)
+10. [Reusing the code](#10-reusing-the-code)
 
 ---
 
@@ -29,6 +31,30 @@ work. Every claim points to the notebook section that shows the evidence.
 
 The model does **not** predict *when* a problem will occur. It estimates whether a kitchen is
 currently operating with a Priority problem, based on its track record and its surroundings.
+
+**Stakeholder.** The Commissioner of Boston's Inspectional Services Department (ISD), whose Health
+Division carries out the inspections. The choice follows from the design:
+- The lever, the order of routine inspections within the month, is an ISD operational decision.
+- The evaluation holds ISD's staff and schedule fixed.
+- The dollar value is ISD inspector capacity, priced from ISD's own payroll (§7, business impact),
+  and the running cost is ISD analyst time.
+- Approving a pilot and explaining the list publicly, including the fairness check, are
+  commissioner-level decisions.
+
+Inspection supervisors who hand out the monthly lists are the day-to-day users. Residents are the
+beneficiaries. The README is written for a data scientist on ISD's or the city's analytics team.
+
+**What is optimised.** Hazards found *earlier*: the share of first-half visits that find a
+Priority violation (§4). For residents, that means hazards found and fixed days sooner. For the
+city, it means more problems found per inspector visit with the same staff.
+
+**Out of scope:**
+- deciding who is due or how often;
+- complaint-driven and other irregular visits;
+- pass/fail grades, closures or illness outbreaks.
+
+**Signals tested and dropped** because they added nothing: the owner's other establishments,
+nearby 311 complaints, violation types and calendar or season (§7, tuning round).
 
 ---
 
@@ -519,6 +545,14 @@ hindsight (ceiling).
 | Share of the possible hazard-days | — | 27% | 44% | 100% |
 | Capacity equivalent (inspections) | — | 930 | 1,327 | 2,824 |
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_impact_tiers_dark.png">
+  <img src="results/figures/readme_impact_tiers_light.png" width="760" alt="Average number of serious violations not yet found on each day of the month, 2025–26, under four orders. Today's order declines roughly in a straight line from about 114 on day 1 to zero at month end; the simple rule and the model fall faster, and perfect hindsight reaches zero by mid-month. The simple rule removes 4,142 hazard-days a year, the model 2,539 more, and 8,582 remain between the model and the ceiling.">
+</picture>
+
+Each line shows how many serious violations are still waiting to be found on each day of the
+month. The shaded areas are the hazard-days each tier removes.
+
 - **Model over Rule 1:** +92 hazards found early [70, 115] and 2,539 hazard-days [2,176, 2,918] a
   year; positive in all 2,000 resampled years. The model beats the rule in 20 of 22 months
   (one-sided sign test p = 0.0001).
@@ -592,3 +626,111 @@ violation at 26% of visits, against 15% in the second half.
   illnesses. → nb 06 §6
 - **History resets with new licenses.** Ownership changes create new license numbers, and
   `property_id` is too coarse to link them.
+
+---
+
+## 9. Implications for use
+
+- **Start with Rule 1.** Sorting the month's list by the previous inspection needs no model and
+  delivers 60–70% of the benefit (about $124,000 a year of the $177,000 in inspector capacity). The
+  model adds about 90 more serious violations found early each year, and beats the rule in 20 of
+  22 test months.
+- **If a model is used, model (b) without comments is the practical choice.** It is simpler to run
+  and explain, and on the test period it found violations as often as the primary model, within
+  measurement error (+0.3 [−0.1, +0.7]).
+- **Use the scores to rank, and refit at least yearly.** The model under-predicted 2026 as
+  violations became more common. The order stayed right, but probabilities shown to inspectors need
+  a current base rate. `inspections.rank` refits on every run.
+- **Explain the inputs openly.** Nearby inspection outcomes partly reflect inspectors (§8), and the
+  fairness check covers only the order within the month.
+- **More than half of the possible gain is out of reach** with this data. It sits in places with
+  clean records whose kitchens slipped, which past inspections give no reason to visit first.
+- **For explaining the list to inspectors,** show each place's last inspection notes rather than
+  model-picked snippets (§7, Phase 2).
+- **The economics favour a trial.** The list costs a few analyst hours a month and adds no
+  inspections. Its capacity value is about 25 times the running cost, and preventing one or two
+  foodborne illnesses a year would pay for it on its own.
+- **Next: a live pilot.** Only a pilot can confirm that inspectors can follow the order, that
+  conditions hold between the list and the visit, and how many illnesses are prevented. A
+  twice-monthly list would give fresher inputs at the same per-visit gain (hazard-days roughly
+  halve, because the window is shorter).
+
+---
+
+## 10. Reusing the code
+
+The reusable code is the Python package in `src/inspections/`; setup is in the README. The notebooks
+explain how each choice was made; you don't need them to run the code.
+
+### Producing a month's priority list
+```bash
+python -m inspections.download --only inspections && python -m inspections.prepare   # refresh the data first
+python -m inspections.rank --month 2026-12 --due due.csv
+```
+- **Input:** `due.csv` has one column, `licenseno`, listing the establishments due for a routine
+  inspection that month. The city's schedule decides who is due, so the list must come from the
+  city.
+- **Output:** `data/outputs/priority_list_2026-12.csv`, highest risk first. It holds the rank, risk
+  score, license type, date and result of the last routine inspection, and its inspector notes with
+  personal names removed. Visit the top half in the first half of the month.
+- **Options:**
+  - `--with-text` adds the inspector-comment score, which gave no detectable gain.
+  - `--out` chooses another output path.
+  - Leaving out `--due` replays a past month's actual routine visits, which is useful for checking
+    the list.
+- The model is refit on every run, on all routine inspections from 2020 to the end of the previous
+  month, using only data from before the month starts (§7, from evaluation to a monthly list).
+
+### Using the pieces in your own code
+```python
+from inspections import features, models, prepare
+from inspections.metrics import bootstrap_diff, hit_rate, per_month
+
+t = prepare.load_processed()                                  # visits, violations, licenses, complaints
+visits = t['visits']
+rows = visits[visits.in_prediction_set & visits.split.isin(['train', 'valid'])]   # routine visits 2020–2024
+X = features.build_model_b(features.decision_keys(rows), visits,                  # 33 inputs as of each month's start
+                           features.violation_group_counts(t['violations']), t['licenses'])
+year = rows.visit_ts.dt.year.to_numpy()
+scores = models.fit_and_score(X, rows.hit.to_numpy(), train=year < 2024, score=year == 2024)
+
+ev = rows.loc[year == 2024, ['month', 'visit_ts', 'hit']].assign(
+    tiebreak=0.0, model=scores.model_b, rule=features.rule1_score(X.loc[year == 2024]))
+print(hit_rate(per_month(ev, 'model')), hit_rate(per_month(ev, 'rule')))          # 34.8% vs 32.4%
+print(bootstrap_diff(per_month(ev, 'model'), per_month(ev, 'rule')))              # 95% CI of the difference
+```
+- **Score your own ordering:** put it in a column of an evaluation frame like `ev` (higher = visit
+  earlier) and pass the column name to the `inspections.metrics` functions.
+- **Try your own model:** use `X` and `rows.hit` as features and labels, and keep training years
+  before the years you score.
+- **Text tools:** `inspections.text` holds the comment masking (`clean_comment`) and the
+  display-time name scan (`NameScan`), for any work that shows inspector notes.
+
+| Module | Purpose |
+|---|---|
+| `download`, `prepare` | fetch the public data; turn it into clean tables of visits, violations, licenses and complaints |
+| `features` | the model's inputs, computed from data before each month only |
+| `models` | model (b), and model (b) plus the comment score |
+| `metrics` | first-half hit rate, confidence intervals, days earlier, capture curve |
+| `text` | comment cleaning and personal-data checks |
+| `rank` | the monthly priority list |
+
+### Adapting it to another city
+The method needs only a history of inspections with dates, results and violation severity per
+establishment. To port it:
+- **Data source:** replace the IDs in `config.py` and the download functions in `download.py`.
+- **Data rules (`prepare.py`):**
+  - map the city's result codes to fail / pass / filed (`RESULT_ROLE`);
+  - set which violation level counts as serious (`viol_level == '***'` here);
+  - check the 90-day rule that separates routine visits from follow-ups;
+  - adjust the address and coordinate parsing.
+- **Time splits:** set the dates in `config.py`. Choose settings on earlier years, and keep the
+  last period for one final test.
+- **Validation:** rerun `pytest`, then notebooks 01–02 to check the visit rules and the baselines on
+  the new data before trusting any model.
+
+### Re-running the analysis
+Run the notebooks in `notebooks/` in order, with Restart & Run All. Each writes its results to
+`results/experiments.csv`, and each stops if one of its checks fails. Notebook 04's transformer
+experiment retrains for hours unless its cached scores are present, so keep the machine awake
+(`caffeinate -i`). Contributor guide and rules: [CONTRIBUTING.md](CONTRIBUTING.md).

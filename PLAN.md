@@ -8,22 +8,22 @@ public overview is [README.md](README.md).
 With the **same number of inspections**, give Boston's inspectors a monthly priority list that puts
 the establishments most likely to have a Priority violation first. The city gets more problems
 found per inspector visit; residents get hazards found and fixed sooner.
-Problem statement: README.md · task definition, metric and baselines: TECHNICAL.md §1–5.
+Stakeholder: the ISD Commissioner (TECHNICAL.md §1). Task definition, metric and baselines: TECHNICAL.md §1–5.
 
 ## Status and next steps
-**All three phases are complete.** Notebook 06 (business impact) is awaiting review.
+**All three phases are complete and reviewed.** Remaining: the course deliverables for Project 1
+(due 2026-11-20): a 5–10 slide deck and a two-minute video for the ISD Commissioner.
 - **Headline (test period Jan 2025 – Oct 2026, scored once):** primary model (b) + text +3.0 per 100
   first-half visits over Rule 1 [+2.3, +3.7], exit bar met at the threshold; model (b) alone +2.8.
-  Details: README results, TECHNICAL.md §7.
+  Details: TECHNICAL.md §7.
 - **Business impact:** about 6,700 hazard-days removed a year (Rule 1 4,100); inspector capacity
   worth about $177,000 a year; break-even about 1.5 foodborne illnesses a year.
 - **Code:** package `src/inspections/` with 34 tests, pinned dependencies and the monthly-list script
   `python -m inspections.rank`. Every notebook re-runs on the package with identical results.
 - **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections),
-  public since 2026-11-11, with collaborators Jess-Bezof and carlarus99 (write access).
+  public since 2026-11-11.
 
-**Open for you:** review of notebook 06; implementation effort and a pilot design, if wanted; branch
-protection on `main` (now available, since the repo is public).
+**Open for you:** branch protection on `main`; implementation effort and a pilot design, if wanted.
 
 ## How we work
 1. **Phases 1 and 2 happen in Jupyter notebooks**, one per step, each reading top to bottom:
@@ -33,7 +33,7 @@ protection on `main` (now available, since the repo is public).
    order. I stop at its open decisions for your review.
 3. **Shared code lives in `src/inspections/`;** code only one notebook uses stays in that notebook.
 4. **Documentation:** settled reasoning goes in TECHNICAL.md; this file keeps one-line decisions;
-   the README stays high-level.
+   the README stays one page, for a data scientist.
 5. **Commits:** the author's go directly to `main`; collaborators branch and open a pull request
    (CONTRIBUTING rule 6).
 6. **Environment:** project `.venv` (Homebrew Python 3.14) with all dependencies, kernel
@@ -47,7 +47,7 @@ protection on `main` (now available, since the repo is public).
 | 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
 | 04 | `04_text_models` | Does inspector-comment text add value? | ✅ done · reviewed; TF-IDF kept (ranking gain, headline unchanged); stop rule met; transformer paused |
 | 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | ✅ done · reviewed; exit bar met at the threshold (+3.0 [+2.3, +3.7]); text not detectable; no group worse off than today |
-| 06 | `06_business_impact` | What the result means in operational and economic terms, by tier | ✅ done · **awaiting review**; model removes 6,700 hazard-days a year (rule 4,100, ceiling 15,300); capacity worth about $177,000 a year; break-even about 1.5 illnesses a year |
+| 06 | `06_business_impact` | What the result means in operational and economic terms, by tier | ✅ done · reviewed; model removes 6,700 hazard-days a year (rule 4,100, ceiling 15,300); capacity worth about $177,000 a year; break-even about 1.5 illnesses a year |
 
 ## Phases
 **Phase 1, tabular (done).** Exit criterion: beat Rule 1 by ≥ 3 hits per 100 visits with a CI
@@ -248,3 +248,6 @@ fails.
 | 2026-11-11 | Business impact (nb 06): four tiers on the test period (today, Rule 1, model, ceiling); measures: hazards found early, hazard-days, capacity equivalent, break-even illnesses (USDA ERS 2023 cost per case). No illness counts claimed |
 | 2026-11-11 | nb 06 dollar value: inspector-capacity (replacement-cost) value from the city's 2025 Employee Earnings Report (ISD health inspectors, no names; new `download --only earnings`), about $133 per inspection; illness value only as labelled scenarios |
 | 2026-11-11 | Repository made **public**; notebooks and docs scrubbed for repetition and review-process text |
+| 2026-11-12 | nb 06 signed off by the author |
+| 2026-11-12 | **Target stakeholder: the Commissioner of Boston's Inspectional Services Department (ISD).** ISD owns the lever (inspection order), the fixed staff and schedule, the payroll behind the dollar value and the pilot decision. Supervisors are users, residents beneficiaries (TECHNICAL.md §1) |
+| 2026-11-12 | README cut to one page for a data scientist (the course requirement). Scope, the impact chart, implications and the full runbook moved to TECHNICAL.md §1, §7, §9 and §10 |

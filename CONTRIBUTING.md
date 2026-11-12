@@ -5,8 +5,8 @@ looks the way it does is in [TECHNICAL.md](TECHNICAL.md).
 
 ## Layout
 ```
-README.md          public overview: motivation, problem statement, results
-TECHNICAL.md       methodology: data findings, prediction set, metric, results, limitations
+README.md          one-page overview for a data scientist: task, approach, results, how to reproduce
+TECHNICAL.md       methodology, full results, limitations, recommendations, reusing the code
 PLAN.md            working plan: next steps, open questions, backlog, risk register, decision log
 CONTRIBUTING.md    this file
 pyproject.toml     package metadata and compatible dependency ranges
@@ -51,7 +51,7 @@ The download writes a dated snapshot plus `data/raw/manifest.json` (row counts, 
 count, SHA-256), so every result traces back to the data it used. The source updates daily, so
 don't overwrite old snapshots. Then run the notebooks in order; notebook 01 explains and checks the
 rules that `prepare` applies, and confirms both give identical tables. How to produce a month's
-priority list is in the [README runbook](README.md#2--produce-a-months-priority-list).
+priority list is in the [TECHNICAL.md §10](TECHNICAL.md#10-reusing-the-code).
 
 ## Rules
 1. **Decision-time features only.** A feature for a visit may use only data from before the first
