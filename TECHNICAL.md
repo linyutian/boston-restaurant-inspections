@@ -4,8 +4,6 @@ How the problem was turned into a prediction task, what the data revealed, how m
 and what the results rest on. Written for a data scientist who wants to understand or challenge the
 work. Every claim points to the notebook section that shows the evidence.
 
-This is a living document: sections are added as the work and the review progress.
-
 **Contents**
 1. [The problem in ML terms](#1-the-problem-in-ml-terms)
 2. [Data: core findings and what they imply](#2-data-core-findings-and-what-they-imply)
@@ -162,23 +160,17 @@ a group of equal scores. Those visits need an order.
   to 100%, and the model's curve lies above the best rule's everywhere. → nb 02 §5, nb 03 §5
 
 ### Reading the capture curve
-The capture curve plots, for each ordering, the share of a month's hits found (vertical axis) against
-how far down the month's list inspectors have gone (horizontal axis), averaged over months.
-- **Every line ends at 100% / 100%.** By month's end every ordering has made all the visits and
-  found all the hits; orderings differ only in **how fast** they climb.
-- **No risk information climbs along the diagonal:** half the visits find about half the hits. That
-  is what current practice looks like.
-- **The oracle reaches 100% at about a quarter of the visits,** not at 50%: with a hit rate of about
-  23%, a perfect order finds every hit within roughly the first quarter of the month, then flattens.
-  It is the steepest possible climb.
-- **The 50% line is where HR@50 is read.** In 2024 the rules have found about 70% of the month's hits
-  there, vs about 50% for current practice and 100% for the oracle.
-- **It shows the choice of cut doesn't matter;** the order of the methods is the same at 25% or 75%.
-  It does *not* address how often the list should be made (monthly vs. every two weeks); that is a
-  question about the planning period, tested separately (§4 assumptions, two-week replay).
-- HR@50 and the curve are two views of the same quantity: the curve gives the share of **all the
-  month's hits** found by the first half; HR@50 gives the share of **first-half visits** that found
-  one.
+The capture curve plots the share of a month's hits found against how far down the month's list
+inspectors have gone, averaged over months.
+- **Every line ends at 100%:** by month's end every ordering has made all the visits. Orderings
+  differ only in **how fast** they climb.
+- **An order with no risk information climbs along the diagonal,** as current practice does.
+- **The oracle reaches 100% at about a quarter of the visits,** because only about 23% of visits are
+  hits.
+- **HR@50 is read at the 50% line,** from the other side: the curve gives the share of **all the
+  month's hits** found by then; HR@50 the share of **first-half visits** that found one.
+- How often the list is made (monthly or every two weeks) is a separate question, tested by the
+  two-week replay (assumption 3 below).
 
 ### How it is reported
 - **Extra hits per 100 visits** = 100 × (HR@50 of a model − HR@50 of a comparator).
@@ -244,10 +236,7 @@ All comparators are computed with **decision-time** inputs (§6). Validation yea
 - **Rule 2's weights are hand-set judgment calls, deliberately not learned from data.** It stands for
   the checklist an analyst could write without modelling: failing last time is the strongest known
   predictor, so it counts double, and the other facts are secondary. Tuning the weights would turn
-  it into a disguised model; learning weights is the job of the models in §7. The rule was first
-  written in the plan before any data was examined, with "+1 *per* past severe violation". It was
-  simplified to "+1 if the last routine visit had one" when coded, to keep the score bounded. The
-  change was made while writing the code, not after seeing results.
+  it into a disguised model; learning weights is the job of the models in §7.
 - **Rule 2 is *worse* than Rule 1** (−1.0 [−1.5, −0.4]). By total score, the hit rate rises 11% → 12% → 20%
   → 31% → 42% for 0–4 points and falls to 33% at 5 (192 visits). Going from 0 to 1 point barely
   changes risk: the single +1 items carry little information. A nearby complaint applies to 38% of
@@ -364,7 +353,7 @@ judged there. → nb 03b
 - **Robustness:** the gain holds on two-week blocks (+2.5, §4). → nb 03b §8
 
 ### Phase 2: inspector-comment text
-*Notebook 04 results, reviewed 2026-11-11. The one-time test (nb 05) follows.* → nb 04
+→ nb 04
 
 **The text a row may see.** The free-text `comments` on violation rows (95–100% coverage in every
 year) from the establishment's **last two routine cycles before t0**: its last two routine visits
@@ -418,29 +407,19 @@ tuned regularisation intact, and every text model enters the same way.
   others generic cleaning notes. Showing the last inspection's comments directly is the safer
   option.
 
-**Compute (E3).** One epoch on 2,000 rows was timed on the M4 Pro (`mps`) first: about 1.3 h
-estimated for the whole DistilBERT backtest, 3.8 h for ModernBERT. Colab (T4) was not timed, since
-it needs an interactive session; at a typical 2–3× speed-up the saving (under an hour) did not
-justify moving the data off the machine. The actual run took 9.3 h of wall-clock time: the largest
-fold (2024, 21,828 training rows) took 39 minutes, in line with the estimate, and the smallest 377,
-so the excess was the machine sleeping or throttling during an unattended run, not the method. Keep
-the machine awake when re-running (`caffeinate -i`), or use a GPU session. Scores are cached in
-`data/processed/` (git-ignored) under a key naming every setting.
+**Compute (E3).** Timing one epoch on 2,000 rows on the M4 Pro (`mps`) estimated 1.3 h for the
+whole DistilBERT backtest (ModernBERT 3.8 h), so it ran locally; Colab was not timed. The actual run
+took 9.3 h of wall-clock time because the machine slept or throttled during the unattended run: the
+largest fold took 39 minutes, in line with the estimate. Keep the machine awake when re-running
+(`caffeinate -i`). Scores are cached in `data/processed/` (git-ignored) under a key naming every
+setting.
 
-**Decisions after review (2026-11-11).**
-- **Models for the one-time test:** model (b) + TF-IDF is primary, because the pre-declared keep
-  rule (PR-AUC) selected it. Model (b) is a pre-declared secondary, because by "simplest model
-  within noise" on the headline the two tie. Both are scored once on the test period; which to
-  deploy rests on the headline, where they are expected to tie.
-- **README:** the Phase 2 expectations were replaced by the 2024 results, including that most of
-  the comment signal overlaps with the structured record. The earlier rough pre-check figure
-  (8% vs 30%) is replaced by the measured one (10% vs 32%).
-- **Transformer work paused.** E4 not run; the stop rule was met and the expected gain is near zero.
-- **Implication:** comment text is worth keeping only for the top of the list and for explanation.
-  A deployment that needs to stay simple can use model (b) alone and lose little.
+**Models for the one-time test.** Model (b) + TF-IDF is primary, because the keep rule (PR-AUC)
+selected it. Model (b) is a pre-declared secondary, because the two tie on the headline. A
+deployment that needs to stay simple can use model (b) alone and lose little.
 
 ### The one-time test (January 2025 – October 2026)
-*Notebook 05 results, reviewed 2026-11-11.* → nb 05
+→ nb 05
 
 **Protocol, fixed before scoring.**
 - Primary model (b) + TF-IDF text, secondary model (b), both retrained once on all 2020–2024 rows
@@ -507,13 +486,8 @@ first half (with a month-bootstrap CI against today's order), and hit rate among
   features places early visits almost identically by income third (59/51/40% vs 60/51/38%), and its
   headline is −0.4 per 100 [−0.9, +0.3]. The tilt comes from establishments' own records.
 
-**Decisions after review (2026-11-11).** The README reports the primary model as the result, since
-it was declared before scoring. It notes that model (b) alone is the practical choice: simpler,
-with no detectable loss on the test. The README headline moved from 2024 to the test period, and
-its chart is redrawn from the test period.
-
 ### Business impact
-*Notebook 06.* The test-period ranking of notebook 05, reproduced exactly, translated into
+→ nb 06. The test-period ranking of notebook 05, reproduced exactly, translated into
 operational terms for four tiers: today's order (baseline), Rule 1, the primary model, and perfect
 hindsight (ceiling).
 

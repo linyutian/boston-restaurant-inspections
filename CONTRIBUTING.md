@@ -50,24 +50,16 @@ pytest                                                   # about 10 seconds
 The download writes a dated snapshot plus `data/raw/manifest.json` (row counts, the portal's own
 count, SHA-256), so every result traces back to the data it used. The source updates daily, so
 don't overwrite old snapshots. Then run the notebooks in order; notebook 01 explains and checks the
-rules that `prepare` applies, and confirms both give identical tables.
-
-**A month's priority list:**
-```bash
-python -m inspections.rank --month 2026-12 --due due.csv     # due.csv: a licenseno column, the licenses due that month
-python -m inspections.rank --month 2026-10                   # replay a past month's actual routine visits
-```
-It refits model (b) on every labelled routine visit up to the end of the previous month and writes
-`data/outputs/priority_list_<month>.csv`: rank, risk score, the last routine inspection's result
-and its comments (masked for personal data). `--with-text` adds the comment score.
+rules that `prepare` applies, and confirms both give identical tables. How to produce a month's
+priority list is in the [README runbook](README.md#2--produce-a-months-priority-list).
 
 ## Rules
 1. **Decision-time features only.** A feature for a visit may use only data from before the first
    day of the visit's month. The truncation and timestamp checks in notebook 03 and the truncation
    tests in `tests/` must pass.
-2. **The test period (2025-01 → 2026-10) is evaluated once**, at the end of Phase 2. Choose models
-   and settings on the 2022–23 backtest folds, and judge them on 2024, which is never used for
-   selection.
+2. **The test period (2025-01 → 2026-10) was evaluated once** (notebook 05) and is not used for any
+   further choice. Choose models and settings on the 2022–23 backtest folds, and judge them on 2024,
+   which is never used for selection.
 3. **Every notebook runs top to bottom** (Restart & Run All) before it is committed, so saved
    outputs are real and in order. Checks use `assert`, so a failure stops the notebook. Change
    shared code in `src/inspections/`, not in a notebook, and run `pytest` before committing.

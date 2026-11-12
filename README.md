@@ -23,8 +23,7 @@ problems per visit, and the public is exposed to hazards for fewer days.
   Other signals (its owner's other establishments, nearby 311 complaints, violation types, season)
   were tested and added nothing.
 - **The action:** sort the month's list by the score and visit the highest-risk places first.
-- **What stays fixed:** the number of inspections, and who is due. The city's schedule still
-  decides who is due; we change only the **order** within the month.
+- **What stays fixed:** the number of inspections, and who is due (the city's schedule decides).
 - **What we optimize:** hazards found **earlier**. The headline is the share of visits that find a
   Priority violation in the first half of each month, compared with today's order and with the
   rule "go back first to the places that were worst last time". That translates into:
@@ -80,10 +79,6 @@ found about half of them, the simple rule 68%, and the model 74%.
   (+3.0, 95% range +2.3 to +3.7). That meets the project's target of +3, though only just. The
   gain holds in both 2025 and 2026, for every type of establishment, and with two-week lists
   instead of monthly ones.
-- **In a year, that means about 300 more serious violations found in the first half of the month
-  than today**, about 90 more than with the simple rule, each about 5 days sooner.
-- **The simple rule already gets most of the way.** With no machine learning, it delivers 60–70% of
-  the model's benefit.
 - **No neighbourhood or income group is worse off than today.** The largest gains are in
   lower-income areas, where serious violations are more common, and early visits find violations
   equally often in every income group.
@@ -108,11 +103,13 @@ month; the shaded areas are the days of exposure each tier removes.
 | Extra inspections today's order would need to match it | — | 930 | **1,327** | 2,824 |
 | Value of that inspector capacity, per year | — | $124,000 | **$177,000** | $376,000 |
 
-- **Same staff, about 6,700 fewer days of uncorrected hazards a year.** The model finds 43% more
-  serious violations in the first half of the month than today's order. Matching that by adding
-  inspections would take about 1,330 more a year, a fifth of the routine workload.
-- **The simple rule delivers about two-thirds of that on its own.** The model's addition, about
-  2,500 hazard-days a year, is consistent: it beat the rule in 20 of the 22 test months.
+- **Same staff, about 6,700 fewer days of uncorrected hazards a year.** The model finds about 300
+  more serious violations in the first half of the month than today's order (43% more), each about
+  5 days sooner. Matching that by adding inspections would take about 1,330 more a year, a fifth of
+  the routine workload.
+- **The simple rule delivers 60–70% of that on its own.** The model's addition, about 90 more
+  violations found early and 2,500 hazard-days a year, is consistent: it beat the rule in 20 of the
+  22 test months.
 - **More than half of the possible gain remains out of reach.** It sits in places with clean
   records whose kitchens slipped, which past inspections give no reason to visit first.
 - **Worth about $177,000 a year in inspector time, for about $7,200 a year to run.** Valued at the

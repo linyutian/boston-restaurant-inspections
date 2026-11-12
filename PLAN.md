@@ -11,93 +11,31 @@ found per inspector visit; residents get hazards found and fixed sooner.
 Problem statement: README.md · task definition, metric and baselines: TECHNICAL.md §1–5.
 
 ## Status and next steps
-**Where we are**
-- **Business impact (notebook 06) done, awaiting review.**
-  - Per year, with the same inspections: today 709 serious violations found in the first half,
-    the simple rule 925, the model 1,017, perfect hindsight 1,364.
-  - Hazard-days removed: rule 4,142, model 6,682 [5,695, 7,667], ceiling 15,263.
-  - The model beats the rule in 20 of 22 months. Break-even: about 1.5 foodborne illnesses a year
-    (USDA cost per case).
-  - **Dollar value:** inspector capacity worth about $177,000 a year ($105,000–$279,000) at the
-    city's payroll cost of about $133 per inspection; the rule alone about $124,000. Illness value
-    shown only as scenarios.
-  - README: new "Business impact" section with the tier chart. TECHNICAL.md §7.
-- **Phase 3 (consolidate) done (2026-11-11).** All three phases are complete.
-  - **Package `src/inspections/`:** `prepare` (notebook 01's rules), `features`, `text`, `models`,
-    `metrics`, `checks`, and `rank` (a month's priority list). The notebooks import it instead of
-    carrying copies; exploratory code used by one notebook stays there.
-  - **Verified:** all six notebooks re-run top to bottom with identical results (experiment log equal
-    to 12 decimals, figures byte-identical); notebook 01 checks that `prepare` rebuilds its tables
-    exactly.
-  - **Tests:** 34 (pytest, about 10 s), including truncation tests, a no-leakage test for the
-    monthly list and one check against the real data.
-  - **Dependencies:** `requirements-lock.txt` (exact environment) and version ranges in
-    `pyproject.toml`; Python 3.12+.
-- **Phase 1 (tabular) done and reviewed:** notebooks 01, 02, 03 and 03b.
-  - **Adopted model (b):** a simplified logistic regression on 33 features.
-  - **On the clean year 2024:** 34.8% first-half hit rate vs 32.4% for Rule 1, i.e. +2.4 hits per
-    100 visits [+1.5, +3.5]; hits found 4.9 vs 3.4 days earlier. The gain holds on two-week blocks
-    (+2.5).
-  - **Exit bar (+3) narrowly not met.** Neither complex models nor tuning moved it.
-  - TECHNICAL.md §4 and §7; README results.
-- **Phase 2 done. Notebook 05 (one-time test) done and reviewed (2026-11-11).**
-  - **Test period Jan 2025 – Oct 2026, scored once:** primary model (b) + text 33.3% first-half hit
-    rate vs Rule 1 30.3%: **+3.0 per 100 [+2.3, +3.7], exit bar met at the threshold**. Model (b)
-    alone +2.8 [+2.2, +3.4]. Text vs model (b) +0.3 [−0.1, +0.7], not detectable.
-  - Holds in 2025 and 2026, for every licence type and with two-week lists. 2026 under-predicted by
-    about 4 points (calibration drift; ranking unaffected).
-  - **Impact:** about 300 more Priority violations a year found in the first half than today (about
-    90 more than Rule 1), about 4.9 days sooner each.
-  - **Fairness:** no neighbourhood or income group clearly worse off than today; gains largest in
-    lower-income areas, where hazards are more common; local-strictness features barely change the
-    allocation.
-  - TECHNICAL.md §7 "The one-time test"; README headline, chart and implications now from the test period.
-- **Notebook 04 (text experiments) done and reviewed (2026-11-11).**
-  - **Selected:** model (b) + a TF-IDF text score (2 cycles of earlier comments). PR-AUC improves in
-    every year (2024: 0.423 → 0.432).
-  - **The headline is unchanged:** 34.8% first-half hit rate on 2024, +0.0 [−0.3, +0.4] vs model
-    (b). Still +2.5 vs Rule 1, so the bar is not met. The gain is in the first 10% of the list
-    (about one extra hit a month).
-  - **Ladder:** E1 TF-IDF kept · E2 frozen embeddings and E3 fine-tuned DistilBERT add nothing →
-    stop rule met; E4 not run.
-  - **Decided:** D1 model (b) + TF-IDF primary, model (b) secondary for the test · D2 transformer
-    work paused · D3 README, TECHNICAL.md and this file updated.
-  - **D4 approved:** notebook 05 agreed and run (2026-11-11).
-- **Documentation** is consistent with the latest run:
-  - README: problem statement, approach, final test results with the chart from the test period,
-    how we got there (Phases 1–2), implications and next steps, and a runbook for reusing the code;
-  - TECHNICAL.md: methodology, living document;
-  - CONTRIBUTING.md: how to work, setup, package layout, monthly list;
-  - this file.
-- **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections)
-  (private), with collaborators Jess-Bezof and carlarus99 invited (write access).
-- **Open, not blocking Phase 2:** branch protection on `main` needs GitHub Pro for a private repo.
-  Options: free Pro via the GitHub Student Developer Pack (recommended), paid Pro, going public, or a
-  soft local guard. Waiting on your choice.
+**All three phases are complete.** Notebook 06 (business impact) is awaiting review.
+- **Headline (test period Jan 2025 – Oct 2026, scored once):** primary model (b) + text +3.0 per 100
+  first-half visits over Rule 1 [+2.3, +3.7], exit bar met at the threshold; model (b) alone +2.8.
+  Details: README results, TECHNICAL.md §7.
+- **Business impact:** about 6,700 hazard-days removed a year (Rule 1 4,100); inspector capacity
+  worth about $177,000 a year; break-even about 1.5 foodborne illnesses a year.
+- **Code:** package `src/inspections/` with 34 tests, pinned dependencies and the monthly-list script
+  `python -m inspections.rank`. Every notebook re-runs on the package with identical results.
+- **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections),
+  public since 2026-11-11, with collaborators Jess-Bezof and carlarus99 (write access).
 
-**What's next, in order**
-1. ✅ Review of notebooks 01–03 (2026-11-11).
-2. ✅ Tuning round, Tier A (nb 03b §1–§7). No gain from tuning (−0.2 [−0.6, +0.2] on 2024).
-   **Model (b) adopted.** Tiers B and C not run (Judgment calls; backlog).
-3. ✅ Two-week replay (nb 03b §8). Gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); "days
-   earlier" halves by construction.
-4. ✅ **Phase 2 go / no-go: GO** (2026-11-11).
-5. ✅ **Phase 2:** notebook 04 (text experiments) and notebook 05 (one-time test, impact,
-   fairness), both reviewed; README updated with the test results.
-6. ✅ **Phase 3:** package with tests, pinned dependencies, monthly-list script, README complete.
-7. ✅ **Business impact** (notebook 06), awaiting review.
-8. **Open for you:** implementation effort and a pilot design, if wanted; branch protection (below).
+**Open for you:** review of notebook 06; implementation effort and a pilot design, if wanted; branch
+protection on `main` (now available, since the repo is public).
 
 ## How we work
 1. **Phases 1 and 2 happen in Jupyter notebooks**, one per step, each reading top to bottom:
    purpose → short markdown / code / output units → `assert` checks for the risk register →
-   findings and decisions.
+   findings.
 2. **I run each notebook top to bottom** before handing it over, so saved outputs are real and in
    order. I stop at its open decisions for your review.
-3. **Helpers start inside the notebook.** Stable code moves into `src/inspections/` in Phase 3.
-4. **Documentation:** settled reasoning goes in TECHNICAL.md (a living document, extended as you
-   review); this file keeps one-line decisions; the README stays high-level.
-5. **Commits:** one per reviewed notebook or change set, made on a short-lived branch and fast-forwarded into `main`.
+3. **Shared code lives in `src/inspections/`;** code only one notebook uses stays in that notebook.
+4. **Documentation:** settled reasoning goes in TECHNICAL.md; this file keeps one-line decisions;
+   the README stays high-level.
+5. **Commits:** the author's go directly to `main`; collaborators branch and open a pull request
+   (CONTRIBUTING rule 6).
 6. **Environment:** project `.venv` (Homebrew Python 3.14) with all dependencies, kernel
    "Python 3.14 (boston-inspections)".
 
@@ -285,7 +223,7 @@ fails.
 | 2026-11-10 | Phase 1 model = **logistic regression** (simplest within noise of best): +2.9 hits per 100 visits vs Rule 1 [+2.3, +3.4], 57% of headroom vs 44%; exit bar of +3 **narrowly not met** (nb 03) |
 | 2026-11-10 | Complaint-driven and irregular visits stay **out of scope**: irregular visits are few (about 8 a month), with an unknown cause and an average hit rate. Complaint triage is a different decision (response urgency) with incomplete data |
 | 2026-11-10 | Problem statement written into README.md |
-| 2026-11-10 | Documentation split: README (public, high-level) · TECHNICAL.md (methodology, living) · PLAN.md (working) · CONTRIBUTING.md (how to work) |
+| 2026-11-10 | Documentation split: README (public, high-level) · TECHNICAL.md (methodology) · PLAN.md (working) · CONTRIBUTING.md (how to work) |
 | 2026-11-10 | Two-week replay queued for notebook 03, after the review of notebooks 02–03 |
 | 2026-11-10 | Comparators renamed: B0 → current practice (the city), B1 → **Rule 1 · previous inspection**, B2 → **Rule 2 · points checklist**. Both rules are our no-ML proposals |
 | 2026-11-10 | Tuning round queued: judgment calls split into *tune* (model, features), *test* (definitions, evaluation design) and *fixed by design* (exit bar, Rule 2 weights) |
@@ -309,3 +247,4 @@ fails.
 | 2026-11-11 | **Phase 3 done.** Shared notebook code moved into `src/inspections/` (prepare, features, text, models, metrics, checks, rank); notebooks import it and reproduce every result exactly; 34 tests; dependencies pinned (`requirements-lock.txt`, Python 3.12+); monthly-list script `python -m inspections.rank` |
 | 2026-11-11 | Business impact (nb 06): four tiers on the test period (today, Rule 1, model, ceiling); measures: hazards found early, hazard-days, capacity equivalent, break-even illnesses (USDA ERS 2023 cost per case). No illness counts claimed |
 | 2026-11-11 | nb 06 dollar value: inspector-capacity (replacement-cost) value from the city's 2025 Employee Earnings Report (ISD health inspectors, no names; new `download --only earnings`), about $133 per inspection; illness value only as labelled scenarios |
+| 2026-11-11 | Repository made **public**; notebooks and docs scrubbed for repetition and review-process text |
