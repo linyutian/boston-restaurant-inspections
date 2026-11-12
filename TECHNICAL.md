@@ -39,7 +39,9 @@ currently operating with a Priority problem, based on its track record and its s
 Source: Analyze Boston *Food Establishment Inspections*, a snapshot of 2026-11-10: 908,247 rows,
 2006-04-04 → 2026-11-06, matching the portal's own row count. Supplemented by 311 food complaints
 and rodent reports (68,360 cases, 2011–2026). For the fairness check only: median household income
-by ZIP code (US Census ACS 5-year 2020–2024, table B19013, public summary file). → nb 01 §1, nb 05 §7
+by ZIP code (US Census ACS 5-year 2020–2024, table B19013, public summary file). For the business
+impact only: Inspectional Services pay by title from the City of Boston Employee Earnings Report 2025,
+downloaded without names. → nb 01 §1, nb 05 §7, nb 06 §7
 
 | Finding | Evidence | Implication |
 |---|---|---|
@@ -510,6 +512,66 @@ it was declared before scoring. It notes that model (b) alone is the practical c
 with no detectable loss on the test. The README headline moved from 2024 to the test period, and
 its chart is redrawn from the test period.
 
+### Business impact
+*Notebook 06.* The test-period ranking of notebook 05, reproduced exactly, translated into
+operational terms for four tiers: today's order (baseline), Rule 1, the primary model, and perfect
+hindsight (ceiling).
+
+**Measures (per year: 22 test months scaled to 12; 95% CIs from resampling months).**
+- **Hazards found in the first half:** routine inspections finding a Priority violation that fall
+  in the first half of the month.
+- **Hazard-days:** for each such inspection, the days from the start of the month to the visit,
+  summed. Each day an establishment with an uncorrected Priority violation keeps operating counts
+  once. *Hazard-days removed* is the difference from today's order. Equivalently, it is the area
+  between two open-hazard curves: the number of hazards not yet found on each day of the month.
+- **Capacity equivalent:** the extra first-half inspections today's order would need, at its own
+  hit rate (23.2%), to find as many hazards early.
+- **Break-even:** foodborne illnesses a year the list would have to prevent to cover its cost.
+
+**Assumptions.**
+- A1: same visits and staff, by design.
+- A2: a hazard was present from the start of the month. Bounded by two-week lists.
+- A3: the hazard ends at the visit.
+- A4: inspectors can follow the order.
+- A5: USDA ERS 2023 cost per foodborne illness, $4,766 for the 31 major pathogens and $781 for
+  unspecified gastroenteritis.
+- A6: 120 analyst hours to set up and 6 hours a month to run, at $100 an hour.
+
+| Per year | Today | Rule 1 | Primary model | Ceiling |
+|---|---|---|---|---|
+| Hazards found in the first half | 709 | 925 (+216 [159, 266]) | 1,017 (+308 [259, 357]) | 1,364 (+656) |
+| Hazard-days removed | — | 4,142 [3,233, 4,994] | 6,682 [5,695, 7,667] | 15,263 |
+| Days earlier per hazard | — | 3.0 | 4.9 | 11.2 |
+| Share of the possible hazard-days | — | 27% | 44% | 100% |
+| Capacity equivalent (inspections) | — | 930 | 1,327 | 2,824 |
+
+- **Model over Rule 1:** +92 hazards found early [70, 115] and 2,539 hazard-days [2,176, 2,918] a
+  year; positive in all 2,000 resampled years. The model beats the rule in 20 of 22 months
+  (one-sided sign test p = 0.0001).
+- **Sensitivity (A2).** With two-week lists, hazard-days roughly halve (Rule 1 2,321, model 3,444,
+  ceiling 7,692) while the tiers keep their order. Model (b) without the comment score: 6,533
+  (monthly).
+- **Break-even.** $19,200 in the first year and $7,200 a year after: about 1.5 illnesses a year at
+  $4,766, or 9 at $781. That is one illness per 4,400 (or 700) hazard-days removed. Whether the
+  ranking meets this cannot be measured from inspection data.
+- **Dollar value (§7).**
+  - *(a) Inspector capacity* (replacement cost) = capacity equivalent × cost of one inspection.
+    Cost of one inspection = P1 × P3 × P2 × P4 ÷ P5:
+    - P1: median total pay of full-year ISD health inspectors, $90,113, from the 2025 payroll;
+    - P2: 17.5 FTE;
+    - P3: benefits and overhead, × 1.35 (1.2–1.6);
+    - P4: share of time on these inspections, 75% (50–100%);
+    - P5: 11,978 inspections in 2025.
+
+    That gives **$133 per inspection** ($79–$210). Capacity value per year: Rule 1 **$124,000**,
+    primary model **$177,000** ($105,000–$279,000; month resampling $148,000–$205,000), model over
+    Rule 1 **$53,000**, ceiling $376,000. This is about 25 times the $7,200 running cost. It is
+    conservative, because routine inspections take longer than the average visit. It is capacity,
+    not cash saved.
+  - *(b) Illness scenarios*, illustration only: at 1 illness per 5,000 / 1,000 / 200 hazard-days,
+    the model's hazard-days are worth $6,000 / $32,000 / $159,000 a year at $4,766 per case
+    ($1,000 / $5,000 / $26,000 at $781).
+
 ### From evaluation to a monthly list
 `python -m inspections.rank --month YYYY-MM` applies the evaluated method to one month (code in
 `src/inspections/rank.py`):
@@ -551,5 +613,8 @@ violation at 26% of visits, against 15% in the second half.
 - **Text may partly encode the inspector.** Some comment phrases look like individual inspectors'
   recording habits. The text's added value is small and spread evenly across areas, but without
   inspector IDs this cannot be separated from the kitchen's condition. → nb 04 §9
+- **No link from violations to illness.** Impact is measured in hazards found and hazard-days;
+  the illnesses it prevents are unknown. Notebook 06 reports only the break-even number of
+  illnesses. → nb 06 §6
 - **History resets with new licenses.** Ownership changes create new license numbers, and
   `property_id` is too coarse to link them.

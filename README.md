@@ -88,6 +88,44 @@ found about half of them, the simple rule 68%, and the model 74%.
   lower-income areas, where serious violations are more common, and early visits find violations
   equally often in every income group.
 
+### Business impact
+What the same result means for a health department, per year, in four tiers: today's order is the
+baseline, then the simple rule, the machine-learning model, and perfect hindsight as the ceiling.
+Each line shows how many serious violations are still waiting to be found on each day of the
+month; the shaded areas are the days of exposure each tier removes.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_impact_tiers_dark.png">
+  <img src="results/figures/readme_impact_tiers_light.png" width="760" alt="Average number of serious violations not yet found on each day of the month, 2025–26, under four orders. Today's order declines roughly in a straight line from about 114 on day 1 to zero at month end; the simple rule and the model fall faster, and perfect hindsight reaches zero by mid-month. The simple rule removes 4,142 hazard-days a year, the model 2,539 more, and 8,582 remain between the model and the ceiling.">
+</picture>
+
+| Per year, 2025–26 | Today | Simple rule | Machine learning | Ceiling |
+|---|---|---|---|---|
+| Serious violations found in the first half of the month | 709 | 925 | **1,017** | 1,364 |
+| Days of uncorrected hazards removed ("hazard-days") | — | 4,142 | **6,682** | 15,263 |
+| Days sooner each serious violation is found | — | 3.0 | **4.9** | 11.2 |
+| Share of the possible gain | — | 27% | **44%** | 100% |
+| Extra inspections today's order would need to match it | — | 930 | **1,327** | 2,824 |
+| Value of that inspector capacity, per year | — | $124,000 | **$177,000** | $376,000 |
+
+- **Same staff, about 6,700 fewer days of uncorrected hazards a year.** The model finds 43% more
+  serious violations in the first half of the month than today's order. Matching that by adding
+  inspections would take about 1,330 more a year, a fifth of the routine workload.
+- **The simple rule delivers about two-thirds of that on its own.** The model's addition, about
+  2,500 hazard-days a year, is consistent: it beat the rule in 20 of the 22 test months.
+- **More than half of the possible gain remains out of reach.** It sits in places with clean
+  records whose kitchens slipped, which past inspections give no reason to visit first.
+- **Worth about $177,000 a year in inspector time, for about $7,200 a year to run.** Valued at the
+  city's own payroll (about $133 per inspection), the extra capacity is worth $105,000–$279,000 a
+  year across the assumptions; the simple rule alone accounts for about $124,000 of it. This is
+  capacity the department gains, not cash it saves.
+- **The health value is plausible but unmeasured.** At the USDA's average cost of a foodborne
+  illness ($4,766 in 2023), preventing about 1.5 illnesses a year would cover the running cost. The
+  data cannot show how many it prevents: that is for a pilot to measure.
+
+Every calculation and assumption is in
+[notebook 06](notebooks/06_business_impact.ipynb).
+
 ### How we got here
 **Phase 1 · structured data.** Developed on 2020–2024 and checked on 2024: 34.8% against 32.4% for
 the simple rule.
@@ -125,6 +163,9 @@ added to the Phase 1 model.
   updating.
 - **Explain the inputs openly.** Nearby inspection outcomes partly reflect inspectors, and the
   fairness check covered the order within the month only.
+- **The economics favour trying it.** The list costs a few analyst hours a month and adds no
+  inspections. Its extra inspector capacity is worth roughly 25 times that cost, and preventing one
+  or two foodborne illnesses a year would pay for it on its own.
 - **A working starting point exists.** `python -m inspections.rank` produces a month's list from
   the public data, refitting the model each time, with each place's last inspection result and
   notes beside its rank.
@@ -223,4 +264,5 @@ Contributor guide and rules: [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Data
 Public open data from [Analyze Boston](https://data.boston.gov/dataset/food-establishment-inspections),
 plus median household income by ZIP code from the US Census (American Community Survey) for the
-fairness check. Personal names are dropped or hashed; no raw data is stored in this repo.
+fairness check, and the city's Employee Earnings Report (pay by job title, no names) for the cost of
+an inspection. Personal names are dropped or hashed; no raw data is stored in this repo.

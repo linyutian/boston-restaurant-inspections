@@ -1,6 +1,6 @@
 """Download a dated snapshot of the raw data from Analyze Boston.
 
-    python -m inspections.download               # inspections + 311 (food & rodent types) + weather + census
+    python -m inspections.download               # inspections + 311 (food & rodent types) + weather + census + earnings
     python -m inspections.download --only inspections
     python -m inspections.download --only 311 --years 2023 2024
 
@@ -147,9 +147,23 @@ def download_census(manifest, stamp):
     record(manifest, 'census_income', out, rows, config.ACS_INCOME_URL)
 
 
+def download_earnings(manifest, stamp):
+    """Pay of Inspectional Services staff from the city's Employee Earnings Report: title and pay only, no names (R18)."""
+    out = config.RAW / f'earnings_isd_{config.EARNINGS_YEAR}_{stamp}.csv'
+    cols = ['DEPARTMENT_NAME', 'TITLE', 'REGULAR', 'OVERTIME', 'TOTAL GROSS']
+    sql = (f'SELECT {", ".join(chr(34) + c + chr(34) for c in cols)} FROM "{config.EARNINGS_RESOURCE}" '
+           "WHERE \"DEPARTMENT_NAME\" ILIKE '%inspectional%'")
+    records = api('datastore_search_sql', sql=sql)['records']
+    with open(out, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=cols, extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(records)
+    record(manifest, 'earnings_isd', out, len(records), f'{config.CKAN_API} SQL, resource {config.EARNINGS_RESOURCE}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--only', choices=['inspections', '311', 'weather', 'census'])
+    parser.add_argument('--only', choices=['inspections', '311', 'weather', 'census', 'earnings'])
     parser.add_argument('--years', type=int, nargs='+', default=sorted(config.SERVICE_311_RESOURCES))
     args = parser.parse_args()
 
@@ -166,6 +180,8 @@ def main():
         download_weather(manifest, stamp)
     if args.only in (None, 'census'):
         download_census(manifest, stamp)
+    if args.only in (None, 'earnings'):
+        download_earnings(manifest, stamp)
 
     manifest_path.write_text(json.dumps(manifest, indent=2))
     print(f'manifest -> {manifest_path}')

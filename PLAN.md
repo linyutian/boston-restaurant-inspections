@@ -12,6 +12,16 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 
 ## Status and next steps
 **Where we are**
+- **Business impact (notebook 06) done, awaiting review.**
+  - Per year, with the same inspections: today 709 serious violations found in the first half,
+    the simple rule 925, the model 1,017, perfect hindsight 1,364.
+  - Hazard-days removed: rule 4,142, model 6,682 [5,695, 7,667], ceiling 15,263.
+  - The model beats the rule in 20 of 22 months. Break-even: about 1.5 foodborne illnesses a year
+    (USDA cost per case).
+  - **Dollar value:** inspector capacity worth about $177,000 a year ($105,000–$279,000) at the
+    city's payroll cost of about $133 per inspection; the rule alone about $124,000. Illness value
+    shown only as scenarios.
+  - README: new "Business impact" section with the tier chart. TECHNICAL.md §7.
 - **Phase 3 (consolidate) done (2026-11-11).** All three phases are complete.
   - **Package `src/inspections/`:** `prepare` (notebook 01's rules), `features`, `text`, `models`,
     `metrics`, `checks`, and `rank` (a month's priority list). The notebooks import it instead of
@@ -75,8 +85,8 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 5. ✅ **Phase 2:** notebook 04 (text experiments) and notebook 05 (one-time test, impact,
    fairness), both reviewed; README updated with the test results.
 6. ✅ **Phase 3:** package with tests, pinned dependencies, monthly-list script, README complete.
-7. **Open for you:** a business section (illness or cost translation, implementation effort, pilot
-   design) if wanted; branch protection (below).
+7. ✅ **Business impact** (notebook 06), awaiting review.
+8. **Open for you:** implementation effort and a pilot design, if wanted; branch protection (below).
 
 ## How we work
 1. **Phases 1 and 2 happen in Jupyter notebooks**, one per step, each reading top to bottom:
@@ -99,6 +109,7 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
 | 04 | `04_text_models` | Does inspector-comment text add value? | ✅ done · reviewed; TF-IDF kept (ranking gain, headline unchanged); stop rule met; transformer paused |
 | 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | ✅ done · reviewed; exit bar met at the threshold (+3.0 [+2.3, +3.7]); text not detectable; no group worse off than today |
+| 06 | `06_business_impact` | What the result means in operational and economic terms, by tier | ✅ done · **awaiting review**; model removes 6,700 hazard-days a year (rule 4,100, ceiling 15,300); capacity worth about $177,000 a year; break-even about 1.5 illnesses a year |
 
 ## Phases
 **Phase 1, tabular (done).** Exit criterion: beat Rule 1 by ≥ 3 hits per 100 visits with a CI
@@ -296,3 +307,5 @@ fails.
 | 2026-11-11 | **Test period scored once** (nb 05, pending review): primary +3.0 [+2.3, +3.7] vs Rule 1, exit bar met at the threshold; secondary +2.8; text not detectable; no group clearly worse off than today. Fairness flag rules (relative calibration gap, month-bootstrap CI) fixed on the 2024 rehearsal before scoring |
 | 2026-11-11 | nb 05 reviewed. README reports the primary model (declared before scoring) and names model (b) alone as the simpler practical option; README headline, chart and implications moved to the test period |
 | 2026-11-11 | **Phase 3 done.** Shared notebook code moved into `src/inspections/` (prepare, features, text, models, metrics, checks, rank); notebooks import it and reproduce every result exactly; 34 tests; dependencies pinned (`requirements-lock.txt`, Python 3.12+); monthly-list script `python -m inspections.rank` |
+| 2026-11-11 | Business impact (nb 06): four tiers on the test period (today, Rule 1, model, ceiling); measures: hazards found early, hazard-days, capacity equivalent, break-even illnesses (USDA ERS 2023 cost per case). No illness counts claimed |
+| 2026-11-11 | nb 06 dollar value: inspector-capacity (replacement-cost) value from the city's 2025 Employee Earnings Report (ISD health inspectors, no names; new `download --only earnings`), about $133 per inspection; illness value only as labelled scenarios |

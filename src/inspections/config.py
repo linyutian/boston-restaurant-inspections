@@ -52,6 +52,11 @@ WEATHER_URL = ('https://www.ncei.noaa.gov/data/global-historical-climatology-net
 ACS_INCOME_URL = ('https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/'
                   'acsdt5y2024-b19013.dat')
 
+# City of Boston Employee Earnings Report, calendar year 2025 (Analyze Boston). Only Inspectional Services rows, without
+# names, are downloaded; used for the cost of an inspection in notebook 06.
+EARNINGS_RESOURCE = '29b3544f-752a-4cb1-a6af-a1de153d20a0'
+EARNINGS_YEAR = 2025
+
 # temporal split (cycle-opening inspection dates, local time, inclusive).
 # Labels start in 2020: Boston switched to the 2013 FDA Food Code during 2019, and only from 2020 on
 # does viol_level '***' mean exactly a Priority (P) violation (notebook 01). Older visits still feed

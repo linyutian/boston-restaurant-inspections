@@ -14,7 +14,7 @@ requirements-lock.txt  the exact environment that produced the results
 src/inspections/   the package (below)
 tests/             pytest suite: synthetic-data unit tests plus one check against the real data
 notebooks/         the analysis, run in order: 01_data_and_labels, 02_metric_and_baselines, 03_tabular_models,
-                   03b_tuning_round, 04_text_models, 05_final_test
+                   03b_tuning_round, 04_text_models, 05_final_test, 06_business_impact
 results/           committed outputs: figures/ and experiments.csv
 data/              local only, git-ignored: raw/ (dated snapshots), processed/ (built by prepare), outputs/ (priority lists)
 ```
@@ -24,7 +24,7 @@ data/              local only, git-ignored: raw/ (dated snapshots), processed/ (
 | Module | What it holds |
 |---|---|
 | `config.py` | paths, data source IDs, split dates, seed |
-| `download.py` | dated raw snapshot: inspections, 311, weather, Census income (`python -m inspections.download`) |
+| `download.py` | dated raw snapshot: inspections, 311, weather, Census income, ISD payroll (`python -m inspections.download`) |
 | `prepare.py` | raw → processed tables, the rules derived in notebook 01 (`python -m inspections.prepare`) |
 | `features.py` | decision-time features: model (b)'s 33, and the Phase 1 groups that were dropped |
 | `text.py` | comment masking, text windows, the display-time name scan |
