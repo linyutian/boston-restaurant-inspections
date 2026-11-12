@@ -12,6 +12,17 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 
 ## Status and next steps
 **Where we are**
+- **Phase 3 (consolidate) done (2026-11-11).** All three phases are complete.
+  - **Package `src/inspections/`:** `prepare` (notebook 01's rules), `features`, `text`, `models`,
+    `metrics`, `checks`, and `rank` (a month's priority list). The notebooks import it instead of
+    carrying copies; exploratory code used by one notebook stays there.
+  - **Verified:** all six notebooks re-run top to bottom with identical results (experiment log equal
+    to 12 decimals, figures byte-identical); notebook 01 checks that `prepare` rebuilds its tables
+    exactly.
+  - **Tests:** 34 (pytest, about 10 s), including truncation tests, a no-leakage test for the
+    monthly list and one check against the real data.
+  - **Dependencies:** `requirements-lock.txt` (exact environment) and version ranges in
+    `pyproject.toml`; Python 3.12+.
 - **Phase 1 (tabular) done and reviewed:** notebooks 01, 02, 03 and 03b.
   - **Adopted model (b):** a simplified logistic regression on 33 features.
   - **On the clean year 2024:** 34.8% first-half hit rate vs 32.4% for Rule 1, i.e. +2.4 hits per
@@ -44,9 +55,9 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
   - **D4 approved:** notebook 05 agreed and run (2026-11-11).
 - **Documentation** is consistent with the latest run:
   - README: problem statement, approach, final test results with the chart from the test period,
-    how we got there (Phases 1–2), implications and next steps;
+    how we got there (Phases 1–2), implications and next steps, and a runbook for reusing the code;
   - TECHNICAL.md: methodology, living document;
-  - CONTRIBUTING.md: how to work;
+  - CONTRIBUTING.md: how to work, setup, package layout, monthly list;
   - this file.
 - **Repository:** [linyutian/boston-restaurant-inspections](https://github.com/linyutian/boston-restaurant-inspections)
   (private), with collaborators Jess-Bezof and carlarus99 invited (write access).
@@ -63,8 +74,9 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 4. ✅ **Phase 2 go / no-go: GO** (2026-11-11).
 5. ✅ **Phase 2:** notebook 04 (text experiments) and notebook 05 (one-time test, impact,
    fairness), both reviewed; README updated with the test results.
-6. **Phase 3:** consolidate code into `src/inspections/` with tests, pin dependencies, and complete
-   the README.
+6. ✅ **Phase 3:** package with tests, pinned dependencies, monthly-list script, README complete.
+7. **Open for you:** a business section (illness or cost translation, implementation effort, pilot
+   design) if wanted; branch protection (below).
 
 ## How we work
 1. **Phases 1 and 2 happen in Jupyter notebooks**, one per step, each reading top to bottom:
@@ -138,8 +150,10 @@ Status after nb 04:
 - **Done in nb 05:** P11 (fairness by neighbourhood and ZIP income) and P12 (two-week lists on the
   test period: +3.2 vs Rule 1; days earlier halves).
 
-**Phase 3, consolidate and publish.** Move stable code into `src/inspections/` with tests, pin
+**Phase 3, consolidate and publish: done.** Move stable code into `src/inspections/` with tests, pin
 dependencies, complete the README (final results, implications and next steps).
+- Outcome: seven modules plus `rank.py`; notebooks import them and reproduce every logged result
+  exactly; 34 tests; `requirements-lock.txt`.
 
 ## Judgment calls: tune or test
 Every value set by judgment or heuristic rather than learned. The split matters:
@@ -218,7 +232,7 @@ fails.
 | R20 | CSV is large (likely several hundred MB; about 2–3 GB in pandas) | ✅ 388 MB file, 516 MB in memory; read once as text, saved as Parquet | nb 01 |
 | R21 | Fine-tuning is slow on a laptop | ✅ Timed first: DistilBERT ≈ 1.3 h estimate for the E3 backtest on `mps`, ModernBERT ≈ 3.8 h. The real run took 9.3 h wall-clock (machine sleep/throttling; the largest fold matched the estimate). Use `caffeinate -i` or a GPU next time | nb 04 |
 | R22 | Weather source needs a NOAA token | Downloaded without a token, but **not used**: visit-day weather isn't known when the monthly list is made (R25) | — |
-| R23 | Results not reproducible (seeds, hidden notebook state) | ✅ Fixed `SEED` (including solver seeds; an unseeded L1 solver was found and pinned in nb 03b); Restart & Run All before every handoff; nb 03b reproduces nb 03 exactly and gives byte-identical logs across runs | every nb |
+| R23 | Results not reproducible (seeds, hidden notebook state) | ✅ Fixed `SEED` (including solver seeds; an unseeded L1 solver was found and pinned in nb 03b); Restart & Run All before every handoff; nb 03b reproduces nb 03 exactly and gives byte-identical logs across runs. Phase 3: all notebooks re-run on the package with identical logs and figures; `requirements-lock.txt` pins the environment | every nb, tests |
 | R24 | `issdttm` is not the original issue date (51% of licenses issued more than 30 days *after* their first inspection) | ✅ Not used; experience = days since the license's first recorded visit | nb 01 |
 | R25 | **Decision-time leakage**: features measured at the visit date (days since last visit, visit-day weather) encode the visit order being evaluated | ✅ All features as of the first day of the visit's month; truncation test (features identical when later data is deleted) and timestamp test | nb 02–03, assert |
 
@@ -281,3 +295,4 @@ fails.
 | 2026-11-11 | nb 05 go. Census income data approved for the fairness check (ACS 2020–2024 by ZIP, public summary file; added to `inspections.download --only census`) |
 | 2026-11-11 | **Test period scored once** (nb 05, pending review): primary +3.0 [+2.3, +3.7] vs Rule 1, exit bar met at the threshold; secondary +2.8; text not detectable; no group clearly worse off than today. Fairness flag rules (relative calibration gap, month-bootstrap CI) fixed on the 2024 rehearsal before scoring |
 | 2026-11-11 | nb 05 reviewed. README reports the primary model (declared before scoring) and names model (b) alone as the simpler practical option; README headline, chart and implications moved to the test period |
+| 2026-11-11 | **Phase 3 done.** Shared notebook code moved into `src/inspections/` (prepare, features, text, models, metrics, checks, rank); notebooks import it and reproduce every result exactly; 34 tests; dependencies pinned (`requirements-lock.txt`, Python 3.12+); monthly-list script `python -m inspections.rank` |

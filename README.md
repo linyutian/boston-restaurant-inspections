@@ -1,6 +1,6 @@
 # Which Boston restaurants should inspectors visit first?
 
-> **Status:** modelling and the final test are complete. The code is being consolidated into a package.
+> **Status:** complete. Analysis in `notebooks/`, reusable code with tests in `src/inspections/`.
 
 ## Motivation
 Boston's health inspectors routinely visit about 4,000 restaurants and food stores, mostly in
@@ -125,17 +125,100 @@ added to the Phase 1 model.
   updating.
 - **Explain the inputs openly.** Nearby inspection outcomes partly reflect inspectors, and the
   fairness check covered the order within the month only.
+- **A working starting point exists.** `python -m inspections.rank` produces a month's list from
+  the public data, refitting the model each time, with each place's last inspection result and
+  notes beside its rank.
 - **Next: a live pilot.** Only a pilot can confirm that inspectors can follow the order and that
   conditions hold between the list and the visit. A twice-monthly list would give fresher inputs
   at the same per-visit gain.
 
-## Reproduce
+## Runbook: reuse the code
+The reusable code is the Python package in `src/inspections/`. Clone the whole repository: the
+package installs from it together with its pinned dependencies, and the data is downloaded
+separately, never stored in the repo. The notebooks explain how each choice was made; you don't
+need them to run the code.
+
+### 1 · Set up (once, about 5 minutes)
 ```bash
-uv venv --python 3.14 && source .venv/bin/activate    # any Python 3.10+
-uv pip install -e ".[dl]"
-python -m inspections.download                         # dated data snapshot into data/raw/
+git clone https://github.com/linyutian/boston-restaurant-inspections.git && cd boston-restaurant-inspections
+uv venv --python 3.14 && source .venv/bin/activate     # Python 3.12 or newer
+uv pip install -r requirements-lock.txt && uv pip install -e . --no-deps   # exact tested versions
+python -m inspections.download                          # public data snapshot into data/raw/ (about 400 MB)
+python -m inspections.prepare                           # clean tables into data/processed/ (seconds)
+pytest                                                  # 34 tests, about 10 seconds
 ```
-Then run the notebooks in `notebooks/` in order. Full setup: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### 2 · Produce a month's priority list
+```bash
+python -m inspections.download --only inspections && python -m inspections.prepare   # refresh the data first
+python -m inspections.rank --month 2026-12 --due due.csv
+```
+- **Input:** `due.csv` has one column, `licenseno`, listing the establishments due for a routine
+  inspection that month. The city's schedule decides who is due, so the list must come from the
+  city.
+- **Output:** `data/outputs/priority_list_2026-12.csv`, highest risk first: rank, risk score,
+  license type, date and result of the last routine inspection, and its inspector notes with
+  personal names removed. Visit the top half in the first half of the month.
+- **Options:**
+  - `--with-text` adds the inspector-comment score, which gave no detectable gain.
+  - `--out` chooses another output path.
+  - Leaving out `--due` replays a past month's actual routine visits, useful for checking the list.
+- The model is refit on every run, on all routine inspections from 2020 to the end of the previous
+  month, using only data from before the month starts.
+
+### 3 · Use the pieces in your own code
+```python
+from inspections import features, models, prepare
+from inspections.metrics import bootstrap_diff, hit_rate, per_month
+
+t = prepare.load_processed()                                  # visits, violations, licenses, complaints
+visits = t['visits']
+rows = visits[visits.in_prediction_set & visits.split.isin(['train', 'valid'])]   # routine visits 2020–2024
+X = features.build_model_b(features.decision_keys(rows), visits,                  # 33 inputs as of each month's start
+                           features.violation_group_counts(t['violations']), t['licenses'])
+year = rows.visit_ts.dt.year.to_numpy()
+scores = models.fit_and_score(X, rows.hit.to_numpy(), train=year < 2024, score=year == 2024)
+
+ev = rows.loc[year == 2024, ['month', 'visit_ts', 'hit']].assign(
+    tiebreak=0.0, model=scores.model_b, rule=features.rule1_score(X.loc[year == 2024]))
+print(hit_rate(per_month(ev, 'model')), hit_rate(per_month(ev, 'rule')))          # 34.8% vs 32.4%
+print(bootstrap_diff(per_month(ev, 'model'), per_month(ev, 'rule')))              # 95% CI of the difference
+```
+- **Score your own ordering:** put it in a column of an evaluation frame like `ev` (higher = visit
+  earlier) and pass the column name to the `inspections.metrics` functions.
+- **Try your own model:** use `X` and `rows.hit` as features and labels, and keep training years
+  before the years you score.
+- **Text tools:** `inspections.text` holds the comment masking (`clean_comment`) and the
+  display-time name scan (`NameScan`), for any work that shows inspector notes.
+
+| Module | Purpose |
+|---|---|
+| `download`, `prepare` | fetch the public data; turn it into clean tables of visits, violations, licenses and complaints |
+| `features` | the model's inputs, computed from data before each month only |
+| `models` | model (b), and model (b) plus the comment score |
+| `metrics` | first-half hit rate, confidence intervals, days earlier, capture curve |
+| `text` | comment cleaning and personal-data checks |
+| `rank` | the monthly priority list |
+
+### 4 · Adapt it to another city
+The method needs only a history of inspections with dates, results and violation severity per
+establishment. To port it:
+- **Data source:** replace the IDs in `config.py` and the download functions in `download.py`.
+- **Data rules (`prepare.py`):**
+  - map the city's result codes to fail / pass / filed (`RESULT_ROLE`);
+  - set which violation level counts as serious (`viol_level == '***'` here);
+  - check the 90-day rule that separates routine visits from follow-ups;
+  - adjust the address and coordinate parsing.
+- **Time splits:** set the dates in `config.py`. Choose settings on earlier years, and keep the
+  last period for one final test.
+- **Validation:** rerun `pytest`, then notebooks 01–02 to check the visit rules and the baselines on
+  the new data before trusting any model.
+
+### 5 · Re-run the analysis
+Run the notebooks in `notebooks/` in order, with Restart & Run All. Each writes its results to
+`results/experiments.csv`, and each stops if one of its checks fails. Notebook 04's transformer
+experiment retrains for hours unless its cached scores are present, so keep the machine awake.
+Contributor guide and rules: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Data
 Public open data from [Analyze Boston](https://data.boston.gov/dataset/food-establishment-inspections),

@@ -510,6 +510,23 @@ it was declared before scoring. It notes that model (b) alone is the practical c
 with no detectable loss on the test. The README headline moved from 2024 to the test period, and
 its chart is redrawn from the test period.
 
+### From evaluation to a monthly list
+`python -m inspections.rank --month YYYY-MM` applies the evaluated method to one month (code in
+`src/inspections/rank.py`):
+- **Due list.** The licenses the city has due that month are an input (`--due`), because the
+  schedule decides who is due. Without it, the script replays the routine visits recorded in that
+  month.
+- **Data.** Only visits, violations and comments from before the first day of the month are read.
+  A test checks that changing anything from the month on leaves the list unchanged.
+- **Model.** Model (b) is refit on every labelled routine visit from 2020 to the end of the previous
+  month, so the base rate stays current (§7, calibration drift). `--with-text` adds the TF-IDF
+  comment score, stacked as in notebooks 04–05.
+- **Output.** Rank, risk score, the last routine inspection's date, whether it found a Priority
+  violation or failed, and up to three of its comments after the display-time name scan (R18).
+
+On a replay of October 2026 (492 routine visits), the first half of the list found a Priority
+violation at 26% of visits, against 15% in the second half.
+
 ---
 
 ## 8. Limitations

@@ -1,24 +1,25 @@
 [project]
 name = "inspections"
-version = "0.1.0"
+version = "1.0.0"
 description = "Risk-ranked routine food inspections for Boston"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
+# Compatible ranges around the tested versions; the exact tested environment is requirements-lock.txt.
 dependencies = [
-    "numpy",
-    "pandas",
-    "pyarrow",
-    "scikit-learn",
-    "lightgbm",
-    "matplotlib",
-    "jupyterlab",
-    "ipykernel",
-    "nbconvert",
-    "pytest",
+    "numpy>=2.5,<3",
+    "pandas>=3.1,<4",
+    "pyarrow>=26",
+    "scikit-learn>=1.9,<1.10",     # model settings were tuned on 1.9 (penalty set through l1_ratio)
+    "lightgbm>=4.7,<5",
+    "matplotlib>=3.11,<4",
+    "jupyterlab>=4.6,<5",
+    "ipykernel>=7.4",
+    "nbconvert>=7.17,<8",
+    "pytest>=9.2",
 ]
 
 [project.optional-dependencies]
-# Phase 2: text models (fine-tuning runs best on a GPU, e.g. Colab)
-dl = ["torch", "transformers", "sentence-transformers"]
+# Phase 2 text experiments in notebook 04 (embeddings, fine-tuning); not needed for the adopted models
+dl = ["torch>=2.15", "transformers>=5.22,<6", "sentence-transformers>=6.2,<7"]
 
 [build-system]
 requires = ["setuptools>=61"]
@@ -26,3 +27,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
