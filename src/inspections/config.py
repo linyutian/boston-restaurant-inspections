@@ -47,6 +47,11 @@ SERVICE_311_TYPES = [
 WEATHER_URL = ('https://www.ncei.noaa.gov/data/global-historical-climatology-network-daily/'
                'access/USW00014739.csv')
 
+# US Census ACS 5-year median household income (table B19013), table-based summary file: public, no key needed.
+# 2020-2024 estimates, the latest period before the test period. Used only for the fairness check (notebook 05).
+ACS_INCOME_URL = ('https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/'
+                  'acsdt5y2024-b19013.dat')
+
 # temporal split (cycle-opening inspection dates, local time, inclusive).
 # Labels start in 2020: Boston switched to the 2013 FDA Food Code during 2019, and only from 2020 on
 # does viol_level '***' mean exactly a Priority (P) violation (notebook 01). Older visits still feed

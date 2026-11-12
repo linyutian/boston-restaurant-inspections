@@ -1,6 +1,6 @@
 """Download a dated snapshot of the raw data from Analyze Boston.
 
-    python -m inspections.download               # inspections + 311 (food & rodent types) + weather
+    python -m inspections.download               # inspections + 311 (food & rodent types) + weather + census
     python -m inspections.download --only inspections
     python -m inspections.download --only 311 --years 2023 2024
 
@@ -130,9 +130,26 @@ def download_weather(manifest, stamp):
     record(manifest, 'weather', out, rows, config.WEATHER_URL)
 
 
+def download_census(manifest, stamp):
+    """Median household income by ZIP code tabulation area (ACS 5-year); keeps only the ZCTA rows of the national file."""
+    out = config.RAW / f'census_income_zcta_{stamp}.csv'
+    print(f'census <- {config.ACS_INCOME_URL}')
+    rows = 0
+    with urllib.request.urlopen(config.ACS_INCOME_URL, timeout=600) as r, open(out, 'w', newline='', encoding='utf-8') as f:
+        lines = (line.decode('utf-8') for line in r)
+        reader = csv.DictReader(lines, delimiter='|')
+        writer = csv.writer(f)
+        writer.writerow(['zcta', 'median_household_income', 'moe'])
+        for rec in reader:
+            if rec['GEO_ID'].startswith('860Z200US'):
+                writer.writerow([rec['GEO_ID'][-5:], rec['B19013_E001'], rec['B19013_M001']])
+                rows += 1
+    record(manifest, 'census_income', out, rows, config.ACS_INCOME_URL)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--only', choices=['inspections', '311', 'weather'])
+    parser.add_argument('--only', choices=['inspections', '311', 'weather', 'census'])
     parser.add_argument('--years', type=int, nargs='+', default=sorted(config.SERVICE_311_RESOURCES))
     args = parser.parse_args()
 
@@ -147,6 +164,8 @@ def main():
         download_311(manifest, stamp, args.years)
     if args.only in (None, 'weather'):
         download_weather(manifest, stamp)
+    if args.only in (None, 'census'):
+        download_census(manifest, stamp)
 
     manifest_path.write_text(json.dumps(manifest, indent=2))
     print(f'manifest -> {manifest_path}')

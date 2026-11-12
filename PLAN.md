@@ -19,7 +19,19 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
     (+2.5).
   - **Exit bar (+3) narrowly not met.** Neither complex models nor tuning moved it.
   - TECHNICAL.md §4 and §7; README results.
-- **Phase 2 in progress. Notebook 04 (text experiments) is done and reviewed (2026-11-11).**
+- **Phase 2 done. Notebook 05 (one-time test) done and reviewed (2026-11-11).**
+  - **Test period Jan 2025 – Oct 2026, scored once:** primary model (b) + text 33.3% first-half hit
+    rate vs Rule 1 30.3%: **+3.0 per 100 [+2.3, +3.7], exit bar met at the threshold**. Model (b)
+    alone +2.8 [+2.2, +3.4]. Text vs model (b) +0.3 [−0.1, +0.7], not detectable.
+  - Holds in 2025 and 2026, for every licence type and with two-week lists. 2026 under-predicted by
+    about 4 points (calibration drift; ranking unaffected).
+  - **Impact:** about 300 more Priority violations a year found in the first half than today (about
+    90 more than Rule 1), about 4.9 days sooner each.
+  - **Fairness:** no neighbourhood or income group clearly worse off than today; gains largest in
+    lower-income areas, where hazards are more common; local-strictness features barely change the
+    allocation.
+  - TECHNICAL.md §7 "The one-time test"; README headline, chart and implications now from the test period.
+- **Notebook 04 (text experiments) done and reviewed (2026-11-11).**
   - **Selected:** model (b) + a TF-IDF text score (2 cycles of earlier comments). PR-AUC improves in
     every year (2024: 0.423 → 0.432).
   - **The headline is unchanged:** 34.8% first-half hit rate on 2024, +0.0 [−0.3, +0.4] vs model
@@ -29,11 +41,10 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
     stop rule met; E4 not run.
   - **Decided:** D1 model (b) + TF-IDF primary, model (b) secondary for the test · D2 transformer
     work paused · D3 README, TECHNICAL.md and this file updated.
-  - **D4 approved:** notebook 05 is agreed (estimate about 2–3 h of build, under 15 min of compute).
-    **Paused** until the author says go (the run needs uninterrupted internet).
+  - **D4 approved:** notebook 05 agreed and run (2026-11-11).
 - **Documentation** is consistent with the latest run:
-  - README: problem statement, approach, Phase 1 results on 2024 with the chart from model (b),
-    Phase 2 results on 2024 (final test pending);
+  - README: problem statement, approach, final test results with the chart from the test period,
+    how we got there (Phases 1–2), implications and next steps;
   - TECHNICAL.md: methodology, living document;
   - CONTRIBUTING.md: how to work;
   - this file.
@@ -50,8 +61,8 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 3. ✅ Two-week replay (nb 03b §8). Gain over Rule 1 unchanged (+2.5 vs +2.4 on 2024); "days
    earlier" halves by construction.
 4. ✅ **Phase 2 go / no-go: GO** (2026-11-11).
-5. **Phase 2:** ✅ notebook 04 (text experiments), reviewed; D1–D3 decided. Next: notebook 05
-   (one-time test, impact, fairness): approved, paused until the author says go.
+5. ✅ **Phase 2:** notebook 04 (text experiments) and notebook 05 (one-time test, impact,
+   fairness), both reviewed; README updated with the test results.
 6. **Phase 3:** consolidate code into `src/inspections/` with tests, pin dependencies, and complete
    the README.
 
@@ -75,7 +86,7 @@ Problem statement: README.md · task definition, metric and baselines: TECHNICAL
 | 03 | `03_tabular_models` | Does ML on tabular data beat the best rule? | ✅ done · reviewed |
 | 03b | `03b_tuning_round` | Does tuning close the gap to the +3 bar? Do results hold on two-week blocks? | ✅ done · no gain from tuning; model (b) adopted; gain holds on two-week blocks |
 | 04 | `04_text_models` | Does inspector-comment text add value? | ✅ done · reviewed; TF-IDF kept (ranking gain, headline unchanged); stop rule met; transformer paused |
-| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | Phase 2 · approved; paused until the author says go |
+| 05 | `05_final_test` | One-time test-period evaluation, impact, fairness check | ✅ done · reviewed; exit bar met at the threshold (+3.0 [+2.3, +3.7]); text not detectable; no group worse off than today |
 
 ## Phases
 **Phase 1, tabular (done).** Exit criterion: beat Rule 1 by ≥ 3 hits per 100 visits with a CI
@@ -84,7 +95,7 @@ excluding zero.
 - After tuning, judged on the clean year 2024: +2.4 [+1.5, +3.5] (adopted model b).
 - Narrowly not met. Phase 2 goes ahead anyway (decision 2026-11-11).
 
-**Phase 2, inspector-comment text (nb 04–05): nb 04 done and reviewed.** Experiments run
+**Phase 2, inspector-comment text (nb 04–05): done and reviewed.** Experiments run
 cheapest first; each is kept only if it beats the current best:
 1. TF-IDF + logistic regression
 2. Frozen sentence embeddings as extra features
@@ -96,6 +107,8 @@ Stop after two experiments in a row add nothing. Then calibrate, retrain on 2020
 test period once (nb 05), including impact numbers and a fairness check by neighbourhood.
 - Outcome (nb 04): E1 kept (+0.008 PR-AUC on folds 1–2); E2 −0.001 and E3 +0.000 on top of E1 →
   stopped; E4 not run. On 2024: +0.0 per 100 visits vs model (b), +2.5 [+1.6, +3.6] vs Rule 1.
+- Outcome (nb 05, test period): primary +3.0 [+2.3, +3.7] vs Rule 1 (exit bar met at the
+  threshold); secondary +2.8 [+2.2, +3.4]; text +0.3 [−0.1, +0.7] vs model (b).
 
 **Phase 2 pick-up list** (flags and queued items collected during Phase 1):
 
@@ -122,7 +135,8 @@ Status after nb 04:
   - P9: DistilBERT run locally. Colab not timed (needs an interactive session).
   - P10: model-picked snippets are only partly meaningful. Show the last inspection's comments
     instead (§10).
-- **Still to do:** P11 (fairness) in nb 05. P12 for nb 05 as well.
+- **Done in nb 05:** P11 (fairness by neighbourhood and ZIP income) and P12 (two-week lists on the
+  test period: +3.2 vs Rule 1; days earlier halves).
 
 **Phase 3, consolidate and publish.** Move stable code into `src/inspections/` with tests, pin
 dependencies, complete the README (final results, implications and next steps).
@@ -163,12 +177,12 @@ Scope run so far: **Tier A only** (agreed 2026-11-11). Outcomes are in the last 
 | Rule 2 (points checklist) weights | +2 / +1 / +1 / +1 | nb 02 §4 | **fixed by design** | it represents a no-data checklist. Optional extra comparator: a *learned* scorecard (logistic regression on the same four items) |
 
 ## Known weak points
-1. **Gains over the best rule are modest** (about +3 per 100 visits). The rule itself is a valid
-   recommendation; ML has to earn its place.
+1. **Gains over the best rule are modest** (about +3 per 100 visits; +3.0 [+2.3, +3.7] on the
+   test period). The rule itself is a valid recommendation and delivers 60–70% of the benefit.
 2. **Stability over up to two weeks is assumed** by the evaluation. The two-week replay showed the
    gains don't depend on month-long stability; only a live pilot removes the assumption entirely.
 3. **Part of the signal is the inspector, not the kitchen** (local strictness), which raises a
-   fairness and communication question.
+   communication question. The nb 05 fairness check found it barely changes where early visits go.
 4. **The text phase added little** (nb 04): a consistent ranking gain at the very top of the list,
    no change to the first-half hit rate.
 
@@ -191,7 +205,7 @@ fails.
 | **Labels and metric** | | | |
 | R10 | Base rate too high, so the metric has a ceiling | ✅ Avoided by the target choice: Priority violation (about 22%) instead of fail (about 57%); the oracle can about double the first-half hit rate; headroom share reported | nb 01–02 |
 | R11 | Monthly pools too small (especially RF) for stable estimates | ✅ About 470 visits a month pooled (RF about 62); one year gives about 3.7-point CIs, so models are compared on the 36-month backtest; RF reported separately | nb 02–03 |
-| R12 | **Drift**: the label definition changed in 2019; policy or staffing changes; the pandemic period | ✅ Labels start in 2020 (hit rate 19–25% per year since); model calibration is good on the backtest; retrain on 2020–2024 for the test run | nb 01, 03, 05 |
+| R12 | **Drift**: the label definition changed in 2019; policy or staffing changes; the pandemic period | ✅ Labels start in 2020 (hit rate 19–25% per year since); model calibration is good on the backtest; retrained on 2020–2024 for the test run. Test: 2025 calibrated, 2026 under-predicted by about 4 points (base rate 25%); ranking unaffected. Last test month shows no sign of incomplete recording | nb 01, 03, 05 |
 | R13 | Violation code system changes around 2018, breaking violation-group features | ✅ Keyword map on `violdesc` covers 96% (2020+) and 99.7% (earlier) of rows | nb 03, assert coverage |
 | R14 | Group-level encodings (neighborhood, owner fail rate) computed on all years leak the future | ✅ Everything is computed as of decision time; truncation test (features identical when all later data is deleted: 0 mismatches) | nb 03, assert |
 | **Text** | | | |
@@ -264,3 +278,6 @@ fails.
 | 2026-11-11 | Phase 2 started on `main` (author's contributions go directly to `main`; workflow wording unchanged) |
 | 2026-11-11 | nb 04 run (pending review): text enters by stacking (out-of-fold text score as one extra input to model (b)); E1 TF-IDF kept, E2 and E3 add nothing, stop rule met. Decisions D1–D4 open |
 | 2026-11-11 | nb 04 reviewed. D1: model (b) + TF-IDF primary, model (b) pre-declared secondary for nb 05. D2: transformer work paused (E4 not run). D3: README, TECHNICAL.md, PLAN.md updated with the findings. D4: nb 05 approved after its effort estimate; paused until the author says go |
+| 2026-11-11 | nb 05 go. Census income data approved for the fairness check (ACS 2020–2024 by ZIP, public summary file; added to `inspections.download --only census`) |
+| 2026-11-11 | **Test period scored once** (nb 05, pending review): primary +3.0 [+2.3, +3.7] vs Rule 1, exit bar met at the threshold; secondary +2.8; text not detectable; no group clearly worse off than today. Fairness flag rules (relative calibration gap, month-bootstrap CI) fixed on the 2024 rehearsal before scoring |
+| 2026-11-11 | nb 05 reviewed. README reports the primary model (declared before scoring) and names model (b) alone as the simpler practical option; README headline, chart and implications moved to the test period |

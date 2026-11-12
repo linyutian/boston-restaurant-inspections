@@ -38,7 +38,8 @@ currently operating with a Priority problem, based on its track record and its s
 
 Source: Analyze Boston *Food Establishment Inspections*, a snapshot of 2026-11-10: 908,247 rows,
 2006-04-04 → 2026-11-06, matching the portal's own row count. Supplemented by 311 food complaints
-and rodent reports (68,360 cases, 2011–2026). → nb 01 §1
+and rodent reports (68,360 cases, 2011–2026). For the fairness check only: median household income
+by ZIP code (US Census ACS 5-year 2020–2024, table B19013, public summary file). → nb 01 §1, nb 05 §7
 
 | Finding | Evidence | Implication |
 |---|---|---|
@@ -106,15 +107,15 @@ Two layers, one for building rows and one for scoring them:
 | history | 2006–2019 | — | — | **features only**: an establishment's record |
 | train | 2020–2023 | 21,828 | 21% | fitting models |
 | validation | 2024 | 5,629 | 23% | choosing between models |
-| **test** | 2025-01 → 2026-10 | 11,198 | 22% | **locked**: one final evaluation after Phase 2 |
+| **test** | 2025-01 → 2026-10 | 11,198 | 22% | **scored once** (nb 05, 2026-11-11) with models fixed in advance |
 
-Note: the test period's *hit rates* are visible in nb 01's summary table, but no rule or model has
-been evaluated on it.
+Note: the test period's *hit rates* were visible in nb 01's summary table, but no rule or model was
+evaluated on it before nb 05.
 
 **Rolling backtest.** A single validation year gives wide intervals (§4), so models are compared by
 predicting each of 2022, 2023 and 2024 from a model trained only on earlier years (from 2020). The
-36 predicted months (17,354 visits) are pooled. The final model will be retrained on 2020–2024
-before the one-time test. → nb 02 §6, nb 03 §3
+36 predicted months (17,354 visits) are pooled. For the one-time test the models were retrained on
+2020–2024 (nb 05). → nb 02 §6, nb 03 §3
 
 ---
 
@@ -436,14 +437,92 @@ the machine awake when re-running (`caffeinate -i`), or use a GPU session. Score
 - **Implication:** comment text is worth keeping only for the top of the list and for explanation.
   A deployment that needs to stay simple can use model (b) alone and lose little.
 
+### The one-time test (January 2025 – October 2026)
+*Notebook 05 results, reviewed 2026-11-11.* → nb 05
+
+**Protocol, fixed before scoring.**
+- Primary model (b) + TF-IDF text, secondary model (b), both retrained once on all 2020–2024 rows
+  (text scores out-of-fold on training rows) and scored on all 22 test months.
+- Comparators: today's order, Rule 1 and perfect hindsight.
+- Exit bar: primary ≥ +3 per 100 first-half visits over Rule 1, with a CI excluding zero.
+
+**Checks before scoring.**
+- The scoring pipeline reproduces nb 04's logged 2024 results exactly when run on 2020–2023 → 2024.
+- A truncation test on the test period (data from July 2025 deleted) gives 0 mismatches in features
+  and text.
+- The last test month shows no sign of incomplete recording. → nb 05 §1–§2
+
+| Test period (11,198 routine inspections) | First-half hit rate | vs Rule 1, per 100 | Headroom captured | Days earlier |
+|---|---|---|---|---|
+| Today's order | 23.2% | −7.1 | 0% | — |
+| Rule 1 · previous inspection | 30.3% | — | 33% | 3.0 |
+| Model (b) · secondary | 33.0% | +2.8 [+2.2, +3.4] | 46% | 4.8 |
+| **Model (b) + text · primary** | **33.3%** | **+3.0 [+2.3, +3.7]** | **47%** | **4.9** |
+| Perfect hindsight | 44.7% | +14.4 | 100% | 11.2 |
+
+- **Exit bar met, at the threshold:** +3.02 before rounding, CI excluding zero. The interval
+  includes values below +3, so "about +3" is the accurate summary. Model (b) alone: +2.8.
+- **The ranking generalises.**
+  - The gain holds in 2025 (+2.6) and 2026 (+3.5), and for sit-down (+3.5), take-out (+3.1) and
+    retail (+2.8), each with a CI excluding zero.
+  - With two-week lists the gain is +3.2 [+2.4, +4.0].
+  - It is consistent with 2024 (+2.5), so the 2024 numbers were not noticeably flattered by being
+    used for two decisions.
+- **Text:** +0.3 per 100 over model (b) [−0.1, +0.7], not detectable; PR-AUC 0.413 → 0.420. Same
+  direction as every earlier year.
+- **Calibration drifts with the base rate.** 2025 is calibrated (−0.1 points); 2026 is
+  under-predicted by about 4 points as the observed rate rose to 25%. The ranking is unaffected (the
+  gain grew in 2026). If scores are shown as probabilities, refit at least yearly.
+- **Impact** (per year; same visits, only reordered within the month): about 6,100 routine
+  inspections, about 1,360 finding a Priority violation.
+  - The primary model finds about 1,020 of them in the first half of the month: about 300 more than
+    today's order and about 90 more than Rule 1.
+  - Each is found 4.9 days sooner on average, about 6,700 violation-days avoided a year (Rule 1:
+    4,100).
+  - This assumes the hazard was present from the start of the month and is corrected when found.
+
+**Fairness check (P11).** Establishments are assigned a neighbourhood from the city's own 311
+neighbourhood labels (the majority of the 25 nearest cases, falling back to ZIP code) and an income
+level from their ZIP code's median household income (thirds of test visits). Per group: calibration,
+share of visits placed in the first half, share of the group's Priority violations found in the
+first half (with a month-bootstrap CI against today's order), and hit rate among early visits.
+
+| Income third (ZIP median household income) | Hit rate | Early visits: today → model | Hazards found early: today → model | Hit rate of early visits |
+|---|---|---|---|---|
+| Lower ($43k–$86k) | 24% | 49% → 60% | 49% → 83% (+34 [+29, +40]) | 33% |
+| Middle ($87k–$126k) | 23% | 51% → 51% | 52% → 75% (+23 [+19, +29]) | 34% |
+| Higher ($132k–$213k) | 20% | 50% → 38% | 56% → 63% (+7 [+1, +13]) | 32% |
+
+- **No group is clearly worse off than today.** 14 of 16 neighbourhood groups gain with a CI
+  excluding zero (+16 to +39 points). South Boston is unchanged (+1 [−9, +12]). Charlestown, the
+  lowest-risk area (12% hit rate), is −23 [−40, +6]: within noise. The direction is expected,
+  because a ranking moves early visits away from places with few hazards.
+- **Gains follow the risk.** Lower-income areas get more early visits, but early visits find
+  hazards at the same rate in every income third, so they are not over-targeted.
+- **Calibration by group is good.** Income thirds are within 1.7 points of the city-wide gap. Only
+  Jamaica Plain is off by more than 5 points (over-predicted by 5.2).
+- **Local strictness barely moves visits between areas.** Model (b) refit without its six area
+  features places early visits almost identically by income third (59/51/40% vs 60/51/38%), and its
+  headline is −0.4 per 100 [−0.9, +0.3]. The tilt comes from establishments' own records.
+
+**Decisions after review (2026-11-11).** The README reports the primary model as the result, since
+it was declared before scoring. It notes that model (b) alone is the practical choice: simpler,
+with no detectable loss on the test. The README headline moved from 2024 to the test period, and
+its chart is redrawn from the test period.
+
 ---
 
 ## 8. Limitations
 
 - **Part of the signal is the inspector, not the kitchen.** The local-strictness features most
-  likely capture which inspector covers an area; inspector identity is not public. A ranking built
-  partly on this would steer visits toward areas covered by strict inspectors. That affects how
-  results should be presented, and needs a fairness check by neighbourhood before any use.
+  likely capture which inspector covers an area; inspector identity is not public. On the test
+  period they barely change where early visits go (nb 05 §7), but they remain a point to explain in
+  any use, and dropping them costs little (−0.4 per 100, within noise).
+- **The fairness check is partial.** Neighbourhoods come from 311 labels and income from residents'
+  ZIP codes; no race or ethnicity analysis was done; and it covers only the order within the
+  month, not who is due or how often. → nb 05 §7
+- **Calibration drifts.** A model fit on 2020–2024 under-predicted 2026 by about 4 points. Ranking
+  is unaffected; probabilities shown to inspectors need a yearly refit. → nb 05 §5
 - **Some complaints are invisible.** Only 311 complaints can be matched; complaints made directly to
   the health department are not in the data, so a few complaint-driven visits remain in the
   prediction set.

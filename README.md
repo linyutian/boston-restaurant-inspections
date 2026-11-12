@@ -1,6 +1,6 @@
 # Which Boston restaurants should inspectors visit first?
 
-> **Work in progress.** Results are added as each phase completes.
+> **Status:** modelling and the final test are complete. The code is being consolidated into a package.
 
 ## Motivation
 Boston's health inspectors routinely visit about 4,000 restaurants and food stores, mostly in
@@ -46,70 +46,88 @@ without machine learning.
 - **Phase 2 · inspector comments.** Language models, from simple keyword models to a fine-tuned
   transformer, read the notes inspectors wrote at earlier visits and are added to the Phase 1
   model.
+- **Final test.** The chosen model is tested once on January 2025 – October 2026, with a fairness
+  check by neighbourhood and income.
 
 How the data was prepared, how the metric was chosen, and what the results assume:
 **[TECHNICAL.md](TECHNICAL.md)**.
 
 ## Results
 
-### Phase 1 · structured data
-Tested on 2024 (about 5,600 routine inspections), with models trained on 2020–2023 only. No model or
-setting was chosen using 2024, so it is a clean test:
+### Final test: January 2025 – October 2026
+Every model and setting was built and chosen on 2020–2024. The final model was then tested **once**
+on the 22 months that followed (about 11,200 routine inspections), and nothing was changed after
+seeing the results.
 
 | Order of visits within the month | Share of first-half visits that find a Priority violation | Violations found earlier than today |
 |---|---|---|
-| Today's order | 23.8% | — |
-| Simple rule: places whose previous inspection found a Priority violation or failed go first | 32.4% | 3.4 days |
-| **Machine-learning model** | **34.8%** | **4.9 days** |
-| Perfect hindsight (the ceiling) | 46.5% | — |
+| Today's order | 23.2% | — |
+| Simple rule: places whose previous inspection found a Priority violation or failed go first | 30.3% | 3.0 days |
+| **Machine-learning model** | **33.3%** | **4.9 days** |
+| Perfect hindsight (the ceiling) | 44.7% | — |
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_capture_curve_dark.png">
-  <img src="results/figures/readme_capture_curve_light.png" width="720" alt="Share of each month's Priority violations found as inspectors work through the month's list, 2024. By the halfway point, today's order has found 51% of them, the simple rule 70%, the machine-learning model 75%, and perfect hindsight 100%.">
+  <source media="(prefers-color-scheme: dark)" srcset="results/figures/readme_capture_curve_test_dark.png">
+  <img src="results/figures/readme_capture_curve_test_light.png" width="720" alt="Share of each month's Priority violations found as inspectors work through the month's list, January 2025 to October 2026. By the halfway point, today's order has found 52% of them, the simple rule 68%, the machine-learning model 74%, and perfect hindsight 100%.">
 </picture>
 
 *How to read it:* each line follows inspectors through a month's list and shows how many of that
 month's serious violations they have found so far. Every order finds them all by the end of the
 month; the higher the line, the sooner they are found. By the halfway point, today's order has
-found about half of them, the simple rule 70%, and the model 75%.
+found about half of them, the simple rule 68%, and the model 74%.
 
-- **The city's current order carries no risk information** within the month. A simple rule
-  already finds far more violations early.
-- **The model adds about 2.5 more Priority violations found per 100 early visits** on top of the
-  rule. The gain is similar in 2022 and 2023, holds when visits may move only two weeks, and the
-  risk scores are well calibrated.
+- **The model finds about 3 more Priority violations per 100 early visits than the simple rule**
+  (+3.0, 95% range +2.3 to +3.7). That meets the project's target of +3, though only just. The
+  gain holds in both 2025 and 2026, for every type of establishment, and with two-week lists
+  instead of monthly ones.
+- **In a year, that means about 300 more serious violations found in the first half of the month
+  than today**, about 90 more than with the simple rule, each about 5 days sooner.
+- **The simple rule already gets most of the way.** With no machine learning, it delivers 60–70% of
+  the model's benefit.
+- **No neighbourhood or income group is worse off than today.** The largest gains are in
+  lower-income areas, where serious violations are more common, and early visits find violations
+  equally often in every income group.
+
+### How we got here
+**Phase 1 · structured data.** Developed on 2020–2024 and checked on 2024: 34.8% against 32.4% for
+the simple rule.
+- **The city's current order carries no risk information** within the month.
 - **The simplest model worked best.** More complex models, careful tuning and extra signals did no
-  better: the limit is the information in the data, not the algorithm. The final model is a
-  logistic regression on 33 inputs.
-- **Besides an establishment's own record, how strict recent inspections have been nearby matters.**
-  This likely reflects inspectors as much as kitchens, a point to handle carefully in any use.
+  better: the limit is the information in the data, not the algorithm. The model is a logistic
+  regression on 33 inputs.
+- **Besides an establishment's own record, how strict recent inspections have been nearby
+  matters.** This likely reflects inspectors as much as kitchens, but it barely changes which areas
+  are visited early.
 - **What the model misses is mostly surprises:** places with clean records whose kitchens slipped.
 
-### Phase 2 · inspector comments
-Same clean 2024 check as Phase 1. The final test on 2025–26 is still to come.
-
-| Order of visits within the month | Share of first-half visits that find a Priority violation | Share of the month's violations found in the first 10% of visits |
-|---|---|---|
-| Simple rule (as above) | 32.4% | 19.0% |
-| Phase 1 model | 34.8% | 21.5% |
-| **Phase 1 model + inspector comments** | **34.8%** | **22.6%** |
-
-- **The comments add a little, at the very top of the list.** About one extra serious violation
-  is found each month in the first few days, and overall ranking quality improves in every year
-  tested. By mid-month both orders have found the same violations, so the headline does not move.
-- **What the comments add is what kind of kitchen a place is** (raw meat, heavy prep), not how many
-  violations it had. Counting violation types or how much the inspector wrote does not reproduce it.
-- **Most of what the comments say, the inspection record already shows.** Places with more notes,
-  or notes about mice, cockroaches or "repeat" violations, are much riskier (after a last inspection
-  with no serious violation: 10% with no notes vs 32% with six or more). But the Phase 1 model already
-  expects most of that risk.
+**Phase 2 · inspector comments.** A score from the inspectors' notes at the last two inspections is
+added to the Phase 1 model.
+- **The comments add a little, only at the very top of the list:** roughly one extra serious
+  violation found each month in the first few days. On the final test, the model without comments
+  reaches 33.0%, a difference too small to detect.
+- **What the comments add is what kind of kitchen a place is** (raw meat, heavy prep). Most of the
+  rest, such as many notes or mentions of mice, cockroaches or "repeat" violations, the inspection
+  record already shows.
 - **The simplest text model worked best.** Word counts beat sentence embeddings and a fine-tuned
-  transformer (DistilBERT). As in Phase 1, the limit is the information, not the algorithm.
+  transformer (DistilBERT).
 - **For explaining the list to inspectors,** showing a place's last inspection notes is clearer
-  than snippets picked by the model, which are often generic.
+  than snippets picked by the model.
 
 ## Implications and next steps
-_Coming after the final evaluation._
+- **Start with the simple rule.** Sorting the month's list by the previous inspection needs no
+  model and delivers most of the benefit. The model adds about 90 more serious violations found
+  early each year.
+- **If a model is used, the version without comments is the practical choice.** It is simpler to
+  run and explain, and on the final test it found violations as often as the version with comments,
+  within measurement error.
+- **Use the scores to rank, and refit yearly.** The model under-predicted 2026, when violations
+  became more common. The order stayed right, but scores shown as probabilities would need
+  updating.
+- **Explain the inputs openly.** Nearby inspection outcomes partly reflect inspectors, and the
+  fairness check covered the order within the month only.
+- **Next: a live pilot.** Only a pilot can confirm that inspectors can follow the order and that
+  conditions hold between the list and the visit. A twice-monthly list would give fresher inputs
+  at the same per-visit gain.
 
 ## Reproduce
 ```bash
@@ -120,5 +138,6 @@ python -m inspections.download                         # dated data snapshot int
 Then run the notebooks in `notebooks/` in order. Full setup: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Data
-Public open data from [Analyze Boston](https://data.boston.gov/dataset/food-establishment-inspections).
-Personal names are dropped or hashed; no raw data is stored in this repo.
+Public open data from [Analyze Boston](https://data.boston.gov/dataset/food-establishment-inspections),
+plus median household income by ZIP code from the US Census (American Community Survey) for the
+fairness check. Personal names are dropped or hashed; no raw data is stored in this repo.
